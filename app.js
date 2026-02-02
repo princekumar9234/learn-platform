@@ -40,7 +40,11 @@ app.use('/admin', require('./routes/admin'));
 app.use('/', require('./routes/index'));
 
 // Database Connection & Server Start
-mongoose.connect(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/learn-platform')
+// Database Connection & Server Start
+const dbUri = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/learn-platform';
+console.log(`Attempting to connect to database... (URI source: ${process.env.MONGO_URI ? 'ENV' : 'Fallback Local'})`);
+
+mongoose.connect(dbUri)
     .then(() => {
         console.log('MongoDB Connected');
         const PORT = process.env.PORT || 3000;
@@ -50,5 +54,11 @@ mongoose.connect(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/learn-platf
     })
     .catch(err => {
         console.error('MongoDB Connection Error:', err);
-        process.exit(1); // Exit process with failure so Render knows to restart
+        if (err.message && err.message.includes('ECONNREFUSED')) {
+            console.error('\n!!! DEPLOYMENT TIP !!!');
+            console.error('It looks like your app is trying to connect to a local database (127.0.0.1) but failed.');
+            console.error('If you are running on Render (or any cloud provider), you MUST set the MONGO_URI environment variable.');
+            console.error('Render does not provide a local MongoDB. You need a cloud database like MongoDB Atlas.\n');
+        }
+        process.exit(1);
     });
