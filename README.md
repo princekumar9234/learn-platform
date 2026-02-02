@@ -73,6 +73,6 @@ A comprehensive Student Learning Portal designed for mastering web development. 
 
 This project is open-source and available for educational purposes.
 
-### LERAN PLATFORM VIEW
+### LEARN PLATFORM VIEW
 
 ![LEARN PLATFORM](image.png)
