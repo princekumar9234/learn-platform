@@ -44,9 +44,32 @@ app.use('/', require('./routes/index'));
 const dbUri = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/learn-platform';
 console.log(`Attempting to connect to database... (URI source: ${process.env.MONGO_URI ? 'ENV' : 'Fallback Local'})`);
 
+const Admin = require('./models/Admin');
+const bcrypt = require('bcrypt');
+
+async function seedDefaultAdmin() {
+    try {
+        const adminCount = await Admin.countDocuments();
+        if (adminCount === 0) {
+            console.log('No admin found. Seeding default admin...');
+            const hashedPassword = await bcrypt.hash('2008', 10);
+            await Admin.create({
+                email: 'princechouhan9939@gmail.com',
+                password: hashedPassword
+            });
+            console.log('Default Admin Created: princechouhan9939@gmail.com / 2008');
+        } else {
+            console.log('Admin already exists.');
+        }
+    } catch (err) {
+        console.error('Error seeding admin:', err);
+    }
+}
+
 mongoose.connect(dbUri)
-    .then(() => {
+    .then(async () => {
         console.log('MongoDB Connected');
+        await seedDefaultAdmin(); // Run seed check on startup
         const PORT = process.env.PORT || 3000;
         app.listen(PORT, () => {
             console.log(`Server running on http://localhost:${PORT}`);

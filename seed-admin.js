@@ -1,8 +1,10 @@
+require('dotenv').config();
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const Admin = require('./models/Admin');
 
-mongoose.connect('mongodb://127.0.0.1:27017/learn-platform')
+const dbUri = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/learn-platform';
+mongoose.connect(dbUri)
     .then(async () => {
         console.log('Connected to MongoDB');
         
