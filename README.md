@@ -73,6 +73,6 @@ A comprehensive Student Learning Portal designed for mastering web development. 
 
 This project is open-source and available for educational purposes.
 
-### Stone paper View
+### LERAN PLATFORM VIEW
 
 ![LEARN PLATFORM](image.png)
