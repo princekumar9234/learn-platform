@@ -1,0 +1,51 @@
+<%- include('partials/header') %>
+
+<div class="container">
+    <h1 style="margin-bottom: 2rem;">Admin Dashboard</h1>
+
+    <div class="grid" style="margin-bottom: 3rem;">
+        <div class="card" style="text-align: center;">
+            <div class="card-icon" style="color: var(--secondary);"><ion-icon name="people"></ion-icon></div>
+            <h3 class="card-title"><%= studentCount %></h3>
+            <p class="card-desc">Total Students</p>
+            <a href="/admin/students" class="btn btn-primary">Manage Students</a>
+        </div>
+        <div class="card" style="text-align: center;">
+            <div class="card-icon" style="color: var(--success);"><ion-icon name="library"></ion-icon></div>
+            <h3 class="card-title"><%= resourceCount %></h3>
+            <p class="card-desc">Total Resources</p>
+            <a href="/admin/resource/add" class="btn btn-success" style="background-color: var(--success); color: white;">Add Resource</a>
+        </div>
+    </div>
+
+    <h2 style="margin-bottom: 1rem;">Recent Resources</h2>
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Category</th>
+                    <th>Type</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% recentResources.forEach(res => { %>
+                    <tr>
+                        <td><%= res.title %></td>
+                        <td><span class="status-badge" style="background: rgba(99,102,241,0.2); color: var(--primary);"><%= res.category %></span></td>
+                        <td><%= res.type %></td>
+                        <td>
+                            <a href="/admin/resource/edit/<%= res._id %>" class="btn btn-outline" style="padding: 0.25rem 0.5rem; font-size: 0.8rem;">Edit</a>
+                            <form action="/admin/resource/delete/<%= res._id %>" method="POST" style="display: inline;">
+                                <button type="submit" class="btn btn-danger" style="padding: 0.25rem 0.5rem; font-size: 0.8rem; margin-left: 0.5rem;" onclick="return confirm('Delete this resource?')">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                <% }) %>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<%- include('partials/footer') %>

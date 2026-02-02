@@ -1,0 +1,36 @@
+<%- include('partials/header') %>
+
+<div class="container">
+    <h1 style="margin-bottom: 0.5rem;">Welcome, <%= student.name %></h1>
+    <p style="color: var(--text-muted); margin-bottom: 2rem;">Select a category to start learning.</p>
+
+    <div class="grid">
+        <% 
+            const categoryMeta = {
+                'HTML': { icon: 'logo-html5', desc: 'Structure of the web' },
+                'CSS': { icon: 'logo-css3', desc: 'Styling and layouts' },
+                'Javascript': { icon: 'logo-javascript', desc: 'Logic and interactions' },
+                'Node.js': { icon: 'logo-nodejs', desc: 'Server-side runtime' },
+                'MongoDB': { icon: 'leaf', desc: 'NoSQL Database' },
+                'Projects': { icon: 'code-slash', desc: 'Hands-on practice' },
+                'React': { icon: 'logo-react', desc: 'UI Library' },
+                'Python': { icon: 'logo-python', desc: 'Programming Language' },
+                'Vue': { icon: 'logo-vue', desc: 'JS Framework' },
+                'Angular': { icon: 'logo-angular', desc: 'Web Framework' }
+            };
+        %>
+
+        <% categories.forEach(catName => { 
+            const meta = categoryMeta[catName] || { icon: 'folder-open-outline', desc: 'Explore resources' };
+        %>
+            <div class="card">
+                <div class="card-icon"><ion-icon name="<%= meta.icon %>"></ion-icon></div>
+                <h3 class="card-title"><%= catName %></h3>
+                <p class="card-desc"><%= meta.desc %></p>
+                <a href="/category/<%= catName %>" class="btn btn-outline" style="text-align: center;">View Resources</a>
+            </div>
+        <% }) %>
+    </div>
+</div>
+
+<%- include('partials/footer') %>

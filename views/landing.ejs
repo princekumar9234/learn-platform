@@ -1,0 +1,37 @@
+<%- include('partials/header') %>
+
+<section class="hero">
+    <h1>Prince Web Development</h1>
+    <p>Curated resources for HTML, CSS, JavaScript, and the MERN Stack. Start your journey today.</p>
+    <% if (!user && !admin) { %>
+        <a href="/signup" class="btn btn-primary">Get Started</a>
+        <a href="/login" class="btn btn-outline" style="margin-left: 1rem;">Login</a>
+    <% } else if (user) { %>
+        <a href="/dashboard" class="btn btn-primary">Go to Dashboard</a>
+    <% } else { %>
+        <a href="/admin/dashboard" class="btn btn-primary">Admin Dashboard</a>
+    <% } %>
+</section>
+
+<div class="container">
+    <h2 style="text-align: center; margin-bottom: 2rem;">Learning Paths</h2>
+    <div class="grid">
+        <div class="card">
+            <div class="card-icon"><ion-icon name="logo-html5"></ion-icon></div>
+            <h3 class="card-title">HTML & CSS</h3>
+            <p class="card-desc">Build the structure and style of the web.</p>
+        </div>
+        <div class="card">
+            <div class="card-icon"><ion-icon name="logo-javascript"></ion-icon></div>
+            <h3 class="card-title">JavaScript</h3>
+            <p class="card-desc">Add interactivity and logic to your sites.</p>
+        </div>
+        <div class="card">
+            <div class="card-icon"><ion-icon name="server-outline"></ion-icon></div>
+            <h3 class="card-title">Backend</h3>
+            <p class="card-desc">Master Node.js, Express, and Databases.</p>
+        </div>
+    </div>
+</div>
+
+<%- include('partials/footer') %>

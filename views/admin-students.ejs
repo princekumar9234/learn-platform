@@ -1,0 +1,49 @@
+<%- include('partials/header') %>
+
+<div class="container">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <h1>Manage Students</h1>
+        <a href="/admin/dashboard" class="btn btn-outline">Back to Dashboard</a>
+    </div>
+
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Joined</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% students.forEach(student => { %>
+                    <tr>
+                        <td><%= student.name %></td>
+                        <td><%= student.email %></td>
+                        <td><%= new Date(student.createdAt).toLocaleDateString() %></td>
+                        <td>
+                            <% if (student.isBlocked) { %>
+                                <span class="status-badge status-blocked">Blocked</span>
+                            <% } else { %>
+                                <span class="status-badge status-active">Active</span>
+                            <% } %>
+                        </td>
+                        <td>
+                            <form action="/admin/block/<%= student._id %>" method="POST">
+                                <% if (student.isBlocked) { %>
+                                    <button type="submit" class="btn btn-primary" style="padding: 0.25rem 0.75rem; font-size: 0.8rem;">Unblock</button>
+                                <% } else { %>
+                                    <button type="submit" class="btn btn-danger" style="padding: 0.25rem 0.75rem; font-size: 0.8rem;">Block</button>
+                                <% } %>
+                            </form>
+                        </td>
+                    </tr>
+                <% }) %>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<%- include('partials/footer') %>

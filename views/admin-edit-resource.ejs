@@ -1,0 +1,93 @@
+<%- include('partials/header') %>
+
+<div class="form-container">
+    <h2 style="margin-bottom: 1.5rem;">Edit Resource</h2>
+    <% if (error) { %>
+        <div class="alert alert-danger"><%= error %></div>
+    <% } %>
+    <form action="/admin/resource/edit/<%= resource._id %>" method="POST" enctype="multipart/form-data">
+        <div class="form-group">
+            <label class="form-label">Title</label>
+            <input type="text" name="title" class="form-control" value="<%= resource.title %>" required>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Description</label>
+            <textarea name="description" class="form-control" rows="3"><%= resource.description %></textarea>
+        </div>
+        
+        <!-- URL Input -->
+        <div class="form-group" id="url-group">
+            <label class="form-label">URL</label>
+            <input type="text" name="url" id="url-input" class="form-control" value="<%= resource.url %>">
+        </div>
+
+        <!-- File Upload Input (Hidden by default) -->
+        <div class="form-group" id="file-group" style="display: none;">
+            <label class="form-label">
+                Upload New PDF 
+                <span class="text-muted" style="font-size: 0.8rem; font-weight: normal;">(Leave empty to keep current file)</span>
+            </label>
+            <input type="file" name="pdf" id="file-input" class="form-control" accept="application/pdf">
+            <% if(resource.type === 'pdf') { %>
+                <p style="margin-top: 0.5rem; font-size: 0.9rem; color: var(--text-muted);">Current File: <a href="<%= resource.url %>" target="_blank" style="color: var(--primary);">View PDF</a></p>
+            <% } %>
+        </div>
+
+        <div class="grid" style="margin-top: 0; gap: 1rem;">
+            <div class="form-group">
+                <label class="form-label">Type</label>
+                <select name="type" id="type-select" class="form-control" onchange="toggleInput()">
+                    <option value="video" <%= resource.type === 'video' ? 'selected' : '' %>>Video</option>
+                    <option value="article" <%= resource.type === 'article' ? 'selected' : '' %>>Article</option>
+                    <option value="pdf" <%= resource.type === 'pdf' ? 'selected' : '' %>>PDF</option>
+                    <option value="link" <%= resource.type === 'link' ? 'selected' : '' %>>External Link</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Category</label>
+                <input type="text" name="category" class="form-control" list="category-list" value="<%= resource.category %>" required placeholder="Select or Type Category">
+                <datalist id="category-list">
+                    <option value="HTML">
+                    <option value="CSS">
+                    <option value="Javascript">
+                    <option value="Node.js">
+                    <option value="MongoDB">
+                    <option value="Projects">
+                    <option value="React">
+                    <option value="Angular">
+                    <option value="Vue">
+                    <option value="Python">
+                    <option value="Java">
+                    <option value="C++">
+                </datalist>
+            </div>
+        </div>
+        
+        <button type="submit" class="btn btn-primary" style="width: 100%;">Update Resource</button>
+        <a href="/admin/dashboard" class="btn btn-outline" style="width: 100%; margin-top: 1rem; text-align: center;">Cancel</a>
+    </form>
+
+    <script>
+        function toggleInput() {
+            const type = document.getElementById('type-select').value;
+            const urlGroup = document.getElementById('url-group');
+            const fileGroup = document.getElementById('file-group');
+            const urlInput = document.getElementById('url-input');
+            const fileInput = document.getElementById('file-input');
+
+            if (type === 'pdf') {
+                urlGroup.style.display = 'none';
+                fileGroup.style.display = 'block';
+                urlInput.required = false; // Don't require URL if PDF
+            } else {
+                urlGroup.style.display = 'block';
+                fileGroup.style.display = 'none';
+                urlInput.required = true;
+            }
+        }
+        // Run on load to set initial state
+        toggleInput();
+    </script>
+</div>
+
+<%- include('partials/footer') %>

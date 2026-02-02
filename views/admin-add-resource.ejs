@@ -1,0 +1,89 @@
+<%- include('partials/header') %>
+
+<div class="form-container">
+    <h2 style="margin-bottom: 1.5rem;">Add New Resource</h2>
+    <% if (error) { %>
+        <div class="alert alert-danger"><%= error %></div>
+    <% } %>
+    <form action="/admin/resource/add" method="POST" enctype="multipart/form-data">
+        <div class="form-group">
+            <label class="form-label">Title</label>
+            <input type="text" name="title" class="form-control" required>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Description</label>
+            <textarea name="description" class="form-control" rows="3"></textarea>
+        </div>
+        
+        <!-- URL Input -->
+        <div class="form-group" id="url-group">
+            <label class="form-label">URL (Link or File Path)</label>
+            <input type="text" name="url" id="url-input" class="form-control">
+        </div>
+
+        <!-- File Upload Input (Hidden by default) -->
+        <div class="form-group" id="file-group" style="display: none;">
+            <label class="form-label">Upload PDF</label>
+            <input type="file" name="pdf" id="file-input" class="form-control" accept="application/pdf">
+        </div>
+
+        <div class="grid" style="margin-top: 0; gap: 1rem;">
+            <div class="form-group">
+                <label class="form-label">Type</label>
+                <select name="type" id="type-select" class="form-control" onchange="toggleInput()">
+                    <option value="video">Video</option>
+                    <option value="article">Article</option>
+                    <option value="pdf">PDF</option>
+                    <option value="link">External Link</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Category</label>
+                <input type="text" name="category" class="form-control" list="category-list" required placeholder="Select or Type Category">
+                <datalist id="category-list">
+                    <option value="HTML">
+                    <option value="CSS">
+                    <option value="Javascript">
+                    <option value="Node.js">
+                    <option value="MongoDB">
+                    <option value="Projects">
+                    <option value="React">
+                    <option value="Angular">
+                    <option value="Vue">
+                    <option value="Python">
+                    <option value="Java">
+                    <option value="C++">
+                </datalist>
+            </div>
+        </div>
+        
+        <button type="submit" class="btn btn-success" style="width: 100%; background-color: var(--success); color: white;">Add Resource</button>
+
+    <script>
+        function toggleInput() {
+            const type = document.getElementById('type-select').value;
+            const urlGroup = document.getElementById('url-group');
+            const fileGroup = document.getElementById('file-group');
+            const urlInput = document.getElementById('url-input');
+            const fileInput = document.getElementById('file-input');
+
+            if (type === 'pdf') {
+                urlGroup.style.display = 'none';
+                fileGroup.style.display = 'block';
+                urlInput.required = false;
+                // fileInput.required = true; // Optional: Enforce file if PDF
+            } else {
+                urlGroup.style.display = 'block';
+                fileGroup.style.display = 'none';
+                urlInput.required = true;
+                // fileInput.required = false;
+            }
+        }
+        // Run on load to set initial state
+        toggleInput();
+    </script>
+        <a href="/admin/dashboard" class="btn btn-outline" style="width: 100%; margin-top: 1rem; text-align: center;">Cancel</a>
+    </form>
+</div>
+
+<%- include('partials/footer') %>
