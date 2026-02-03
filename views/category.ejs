@@ -14,6 +14,12 @@
             const match = url.match(regExp);
             return (match && match[2].length === 11) ? match[2] : null;
         }
+
+        function getYouTubePlaylistId(url) {
+            const regExp = /[?&]list=([^#&?]+)/;
+            const match = url.match(regExp);
+            return match ? match[1] : null;
+        }
     %>
 
     <% if (resources.length === 0) { %>
@@ -24,9 +30,29 @@
     <% } else { %>
         <div class="video-grid">
             <% resources.forEach(resource => { %>
-                <% const ytId = resource.type === 'video' ? getYouTubeId(resource.url) : null; %>
+                <% 
+                    const ytId = resource.type === 'video' ? getYouTubeId(resource.url) : null; 
+                    const ytPlaylistId = (resource.type === 'video' || resource.type === 'link') ? getYouTubePlaylistId(resource.url) : null;
+                %>
                 
-                <% if (resource.type === 'video' && ytId) { %>
+                <% if (ytPlaylistId) { %>
+                     <!-- Playlist Card -->
+                     <div class="video-card">
+                        <div class="video-wrapper">
+                            <iframe 
+                                src="https://www.youtube.com/embed/videoseries?list=<%= ytPlaylistId %>" 
+                                title="<%= resource.title %>" 
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                                allowfullscreen>
+                            </iframe>
+                        </div>
+                        <div class="video-content">
+                            <h3 class="video-title" title="<%= resource.title %>"><%= resource.title %></h3>
+                            <p class="video-desc"><%= resource.description %></p>
+                            <span class="resource-type" style="margin-top: 0.5rem; display: inline-block;">Playlist</span>
+                        </div>
+                    </div>
+                <% } else if (resource.type === 'video' && ytId) { %>
                     <!-- Video Card -->
                     <div class="video-card">
                         <div class="video-wrapper">
