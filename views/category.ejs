@@ -10,15 +10,27 @@
     
     <% 
         function getYouTubeId(url) {
-            const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
-            const match = url.match(regExp);
-            return (match && match[2].length === 11) ? match[2] : null;
+            try {
+                const urlStr = url.startsWith('http') ? url : 'https://' + url;
+                const urlObj = new URL(urlStr);
+                if (urlObj.hostname.includes('youtu.be')) return urlObj.pathname.slice(1);
+                if (urlObj.pathname.includes('/embed/')) return urlObj.pathname.split('/embed/')[1].split('?')[0];
+                const v = urlObj.searchParams.get('v');
+                if (v) return v;
+                
+                // Regex fallback for other formats
+                const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+                const match = url.match(regExp);
+                return (match && match[2].length === 11) ? match[2] : null;
+            } catch(e) { return null; }
         }
 
         function getYouTubePlaylistId(url) {
-            const regExp = /[?&]list=([^#&?]+)/;
-            const match = url.match(regExp);
-            return match ? match[1] : null;
+            try {
+                const urlStr = url.startsWith('http') ? url : 'https://' + url;
+                const urlObj = new URL(urlStr);
+                return urlObj.searchParams.get('list');
+            } catch(e) { return null; }
         }
     %>
 

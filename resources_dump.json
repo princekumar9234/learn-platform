@@ -1,0 +1,22 @@
+[
+  {
+    "_id": "6980a76e2b3fc176efaa4b34",
+    "title": "python lect.3",
+    "description": "python lecture 3",
+    "type": "video",
+    "url": "https://youtu.be/lIId8IDP6TU",
+    "category": "python",
+    "createdAt": "2026-02-02T13:32:30.285Z",
+    "__v": 0
+  },
+  {
+    "_id": "6980aa58b3ec84cdbc3a993d",
+    "title": "Computer network",
+    "description": "Computer network",
+    "type": "pdf",
+    "url": "/uploads/pdf-1770039896855.pdf",
+    "category": "python",
+    "createdAt": "2026-02-02T13:44:56.895Z",
+    "__v": 0
+  }
+]
