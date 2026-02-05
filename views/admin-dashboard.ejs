@@ -14,11 +14,17 @@
             <div class="card-icon" style="color: var(--success);"><ion-icon name="library"></ion-icon></div>
             <h3 class="card-title"><%= resourceCount %></h3>
             <p class="card-desc">Total Resources</p>
-            <a href="/admin/resource/add" class="btn btn-success" style="background-color: var(--success); color: white;">Add Resource</a>
+            <div style="display: flex; gap: 0.5rem; justify-content: center; margin-top: 1rem;">
+                <a href="/admin/resource/add" class="btn btn-success" style="background-color: var(--success); color: white; padding: 0.5rem 1rem; font-size: 0.9rem;">Add New</a>
+                <a href="/admin/resources" class="btn btn-outline" style="padding: 0.5rem 1rem; font-size: 0.9rem;">View All</a>
+            </div>
         </div>
     </div>
 
-    <h2 style="margin-bottom: 1rem;">Recent Resources</h2>
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
+        <h2 style="margin: 0;">Recent Resources</h2>
+        <a href="/admin/resources" style="color: var(--primary); text-decoration: none; font-weight: 500;">View All &rarr;</a>
+    </div>
     <div class="table-container">
         <table>
             <thead>

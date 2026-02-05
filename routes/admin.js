@@ -66,6 +66,17 @@ router.get('/dashboard', async (req, res) => {
     res.render('admin-dashboard', { studentCount, resourceCount, recentResources: resources });
 });
 
+// All Resources Page
+router.get('/resources', async (req, res) => {
+    try {
+        const resources = await Resource.find().sort('-createdAt');
+        res.render('admin-resources', { resources });
+    } catch (err) {
+        console.error(err);
+        res.redirect('/admin/dashboard');
+    }
+});
+
 // Resource Management
 // Resource Management
 const multer = require('multer');

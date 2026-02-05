@@ -1,0 +1,50 @@
+<%- include('partials/header') %>
+
+<div class="container">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <h1>Manage Resources</h1>
+        <a href="/admin/resource/add" class="btn btn-success" style="background-color: var(--success); color: white;">Add New Resource</a>
+    </div>
+
+    <div class="table-container">
+        <% if (resources.length > 0) { %>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Category</th>
+                        <th>Type</th>
+                        <th>Created At</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% resources.forEach(res => { %>
+                        <tr>
+                            <td><%= res.title %></td>
+                            <td><span class="status-badge" style="background: rgba(99,102,241,0.2); color: var(--primary);"><%= res.category %></span></td>
+                            <td><%= res.type %></td>
+                            <td><%= new Date(res.createdAt).toLocaleDateString() %></td>
+                            <td>
+                                <a href="/admin/resource/edit/<%= res._id %>" class="btn btn-outline" style="padding: 0.25rem 0.5rem; font-size: 0.8rem;">Edit</a>
+                                <form action="/admin/resource/delete/<%= res._id %>" method="POST" style="display: inline;">
+                                    <button type="submit" class="btn btn-danger" style="padding: 0.25rem 0.5rem; font-size: 0.8rem; margin-left: 0.5rem;" onclick="return confirm('Delete this resource?')">Delete</button>
+                                </form>
+                            </td>
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        <% } else { %>
+            <div style="text-align: center; padding: 3rem; color: var(--text-muted);">
+                <p>No resources found.</p>
+            </div>
+        <% } %>
+    </div>
+    
+    <div style="margin-top: 2rem;">
+        <a href="/admin/dashboard" class="btn btn-outline">Back to Dashboard</a>
+    </div>
+</div>
+
+<%- include('partials/footer') %>
