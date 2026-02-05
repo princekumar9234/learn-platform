@@ -67,16 +67,26 @@ router.get('/dashboard', async (req, res) => {
 });
 
 // Resource Management
+// Resource Management
 const multer = require('multer');
 const path = require('path');
+const cloudinary = require('cloudinary').v2;
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
 
-// Configure Multer Storage
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, 'public/uploads/');
-    },
-    filename: function (req, file, cb) {
-        cb(null, 'pdf-' + Date.now() + path.extname(file.originalname));
+// Configure Cloudinary
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET
+});
+
+// Configure Multer Storage for Cloudinary
+const storage = new CloudinaryStorage({
+    cloudinary: cloudinary,
+    params: {
+        folder: 'learn-platform-uploads',
+        allowed_formats: ['pdf'],
+        resource_type: 'auto'
     }
 });
 
@@ -101,9 +111,9 @@ router.post('/resource/add', upload.single('pdf'), async (req, res) => {
         const { title, description, type, category } = req.body;
         let url = req.body.url;
 
-        // If a file was uploaded, use its path as the URL
+        // If a file was uploaded, use its Cloudinary path as the URL
         if (req.file) {
-            url = '/uploads/' + req.file.filename;
+            url = req.file.path;
         }
 
         if (!url) {
@@ -131,9 +141,9 @@ router.post('/resource/edit/:id', upload.single('pdf'), async (req, res) => {
         const { title, description, type, category } = req.body;
         let url = req.body.url;
 
-        // If a file was uploaded, use its path as the URL
+        // If a file was uploaded, use its Cloudinary path as the URL
         if (req.file) {
-            url = '/uploads/' + req.file.filename;
+            url = req.file.path;
         } 
         
         // If type is NOT PDF, verify URL is present
