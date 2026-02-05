@@ -85,23 +85,40 @@ const cloudinary = require('cloudinary').v2;
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
 
 // Configure Cloudinary
-cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET
-});
+// Configure Cloudinary only if keys exist
+if (process.env.CLOUDINARY_CLOUD_NAME) {
+    cloudinary.config({
+        cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+        api_key: process.env.CLOUDINARY_API_KEY,
+        api_secret: process.env.CLOUDINARY_API_SECRET
+    });
+}
 
-// Configure Multer Storage for Cloudinary
-const storage = new CloudinaryStorage({
-    cloudinary: cloudinary,
-    params: {
-        folder: 'learn-platform-uploads',
-        allowed_formats: ['pdf'],
-        resource_type: 'auto',
-        use_filename: true,
-        unique_filename: true
-    }
-});
+// Determine Storage Engine
+let storage;
+if (process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY && process.env.CLOUDINARY_API_SECRET) {
+    // Cloudinary Storage
+    storage = new CloudinaryStorage({
+        cloudinary: cloudinary,
+        params: {
+            folder: 'learn-platform-uploads',
+            allowed_formats: ['pdf'],
+            resource_type: 'auto',
+            use_filename: true,
+            unique_filename: true
+        }
+    });
+} else {
+    // Fallback: Disk Storage
+    storage = multer.diskStorage({
+        destination: function (req, file, cb) {
+            cb(null, 'public/uploads/');
+        },
+        filename: function (req, file, cb) {
+            cb(null, 'pdf-' + Date.now() + path.extname(file.originalname));
+        }
+    });
+}
 
 const upload = multer({ 
     storage: storage,
@@ -124,9 +141,15 @@ router.post('/resource/add', upload.single('pdf'), async (req, res) => {
         const { title, description, type, category } = req.body;
         let url = req.body.url;
 
-        // If a file was uploaded, use its Cloudinary path as the URL
+        // If a file was uploaded, decide URL based on storage type
         if (req.file) {
-            url = req.file.path;
+            if (req.file.path && req.file.path.startsWith('http')) {
+                // Cloudinary returns a full URL in 'path'
+                 url = req.file.path;
+            } else {
+                // Disk storage returns a local path, we construct the URL
+                url = '/uploads/' + req.file.filename;
+            }
         }
 
         if (!url) {
@@ -154,9 +177,13 @@ router.post('/resource/edit/:id', upload.single('pdf'), async (req, res) => {
         const { title, description, type, category } = req.body;
         let url = req.body.url;
 
-        // If a file was uploaded, use its Cloudinary path as the URL
+        // If a file was uploaded, decide URL based on storage type
         if (req.file) {
-            url = req.file.path;
+            if (req.file.path && req.file.path.startsWith('http')) {
+                 url = req.file.path;
+            } else {
+                url = '/uploads/' + req.file.filename;
+            }
         } 
         
         // If type is NOT PDF, verify URL is present

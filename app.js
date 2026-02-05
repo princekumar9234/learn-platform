@@ -15,16 +15,21 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Check Environment Variables
 // Check Environment Variables
-if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) {
-    console.error('================================================================================');
-    console.error('                           CRITICAL ERROR                                       ');
-    console.error('================================================================================');
-    console.error('Cloudinary credentials are MISSING in your .env file or Render Environment.');
-    console.error('You MUST add CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET.');
-    console.error('Get them for free at: https://cloudinary.com/');
-    console.error('Without this, PDF uploads WILL NOT WORK and will crash the app.');
-    console.error('================================================================================\n');
+// Check Environment Variables
+const useCloudinary = process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY && process.env.CLOUDINARY_API_SECRET;
+
+if (!useCloudinary) {
+    console.warn('================================================================================');
+    console.warn('                           WARNING: DISK STORAGE MODE                           ');
+    console.warn('================================================================================');
+    console.warn('Cloudinary credentials are missing. Falling back to local disk storage.');
+    console.warn('NOTE: Files uploaded in this mode will be DELETED when the server restarts on Render.');
+    console.warn('To fix permanency, add CLOUDINARY credentials to your Environment Variables.');
+    console.warn('================================================================================\n');
 }
+
+// Make this available to routes
+app.locals.useCloudinary = useCloudinary;
 if (!process.env.MONGO_URI) {
     console.warn('WARNING: MONGO_URI is missing. Using local database (will not work on Render).');
 }
