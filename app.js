@@ -11,7 +11,15 @@ const app = express();
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(methodOverride('_method'));
+app.use(methodOverride('_method'));
 app.use(express.static(path.join(__dirname, 'public')));
+
+// Ensure Uploads Directory Exists (For Disk Mode)
+const fs = require('fs');
+const uploadDir = path.join(__dirname, 'public/uploads');
+if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir, { recursive: true });
+}
 
 // Check Environment Variables
 // Check Environment Variables
@@ -59,6 +67,11 @@ app.use((req, res, next) => {
 // Routes
 app.use('/admin', require('./routes/admin'));
 app.use('/', require('./routes/index'));
+
+// Handle Missing Uploads (Friendly 404)
+app.get('/uploads/:filename', (req, res) => {
+    res.status(404).render('404-upload');
+});
 
 // Database Connection & Server Start
 // Database Connection & Server Start

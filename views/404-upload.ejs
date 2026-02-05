@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Not Found</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --background: #0f172a;
+            --surface: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--background);
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            text-align: center;
+        }
+        .container {
+            background: var(--surface);
+            padding: 2.5rem;
+            border-radius: 1rem;
+            max-width: 500px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+        }
+        h1 { margin-top: 0; color: #ef4444; }
+        p { color: var(--text-muted); line-height: 1.6; }
+        .btn {
+            display: inline-block;
+            background: var(--primary);
+            color: white;
+            text-decoration: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            margin-top: 1.5rem;
+            font-weight: 500;
+        }
+        .btn:hover { opacity: 0.9; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>File Not Found (404)</h1>
+        <p>The PDF you are looking for is missing.</p>
+        <p style="font-size: 0.9rem;">
+            <strong>Why?</strong> This file was likely uploaded using "Disk Storage Mode" (Temporary) and was deleted during a server restart.
+        </p>
+        <p style="font-size: 0.9rem;">
+            <strong>Solution:</strong> Please ask the Admin to edit this resource and re-upload the PDF. To prevent this in the future, the Admin must configure Cloudinary credentials.
+        </p>
+        <a href="javascript:history.back()" class="btn">Go Back</a>
+    </div>
+</body>
+</html>
