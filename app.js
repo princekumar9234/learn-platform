@@ -13,6 +13,14 @@ app.use(express.json());
 app.use(methodOverride('_method'));
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Check Environment Variables
+if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) {
+    console.warn('WARNING: Cloudinary environment variables are missing. PDF uploads will fail.');
+}
+if (!process.env.MONGO_URI) {
+    console.warn('WARNING: MONGO_URI is missing. Using local database (will not work on Render).');
+}
+
 // Session Config
 app.use(session({
     secret: process.env.SESSION_SECRET || 'devsecretkey',

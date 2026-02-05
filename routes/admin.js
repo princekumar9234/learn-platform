@@ -86,7 +86,9 @@ const storage = new CloudinaryStorage({
     params: {
         folder: 'learn-platform-uploads',
         allowed_formats: ['pdf'],
-        resource_type: 'auto'
+        resource_type: 'auto',
+        use_filename: true,
+        unique_filename: true
     }
 });
 
