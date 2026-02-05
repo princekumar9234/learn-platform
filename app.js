@@ -14,8 +14,16 @@ app.use(methodOverride('_method'));
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Check Environment Variables
+// Check Environment Variables
 if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) {
-    console.warn('WARNING: Cloudinary environment variables are missing. PDF uploads will fail.');
+    console.error('================================================================================');
+    console.error('                           CRITICAL ERROR                                       ');
+    console.error('================================================================================');
+    console.error('Cloudinary credentials are MISSING in your .env file or Render Environment.');
+    console.error('You MUST add CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET.');
+    console.error('Get them for free at: https://cloudinary.com/');
+    console.error('Without this, PDF uploads WILL NOT WORK and will crash the app.');
+    console.error('================================================================================\n');
 }
 if (!process.env.MONGO_URI) {
     console.warn('WARNING: MONGO_URI is missing. Using local database (will not work on Render).');
