@@ -26,6 +26,14 @@ if (!fs.existsSync(uploadDir)) {
 // Check Environment Variables
 const useCloudinary = process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY && process.env.CLOUDINARY_API_SECRET;
 
+console.log('--------------------------------------------------------------------------------');
+console.log('Checking Cloudinary Configuration...');
+console.log('Cloud Name:', process.env.CLOUDINARY_CLOUD_NAME ? 'Set' : 'Missing');
+console.log('API Key:', process.env.CLOUDINARY_API_KEY ? 'Set' : 'Missing');
+console.log('API Secret:', process.env.CLOUDINARY_API_SECRET ? 'Set' : 'Missing');
+console.log('Using Cloudinary:', useCloudinary ? 'YES' : 'NO');
+console.log('--------------------------------------------------------------------------------');
+
 if (!useCloudinary) {
     console.warn('================================================================================');
     console.warn('                           WARNING: DISK STORAGE MODE                           ');

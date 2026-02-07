@@ -159,6 +159,7 @@ router.post('/resource/add', upload.single('pdf'), async (req, res) => {
         await Resource.create({ title, description, type, url, category });
         res.redirect('/admin/dashboard');
     } catch (err) {
+        console.error('CLOUDINARY_UPLOAD_ERROR_DETAILS:', err);
         res.render('admin-add-resource', { error: err.message });
     }
 });
