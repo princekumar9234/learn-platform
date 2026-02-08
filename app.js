@@ -50,8 +50,8 @@ if (!process.env.MONGO_URI) {
     console.warn('WARNING: MONGO_URI is missing. Using local database (will not work on Render).');
 }
 
-// Session Config
-const MongoStore = require('connect-mongo');
+// Trust Proxy for Render/Heroku
+app.enable('trust proxy');
 
 // Session Config with MongoDB Store
 app.use(session({
@@ -63,7 +63,9 @@ app.use(session({
         ttl: 14 * 24 * 60 * 60 // 14 days
     }),
     cookie: { 
-        secure: process.env.NODE_ENV === 'production', 
+        secure: true, // Render runs on HTTPS, so secure:true is good, but trust proxy is needed!
+        sameSite: 'none', // Important for cross-site cookies if needed, but 'lax' (default) is fine usually. 'none' is safest for detailed debugging.
+        httpOnly: true,
         maxAge: 1000 * 60 * 60 * 24 // 1 day
     }
 }));
