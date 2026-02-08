@@ -72,6 +72,27 @@ app.use((req, res, next) => {
     next();
 });
 
+// DEBUG ROUTE - REMOVE IN PRODUCTION
+app.get('/config-check', (req, res) => {
+    const isConfigured = process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY && process.env.CLOUDINARY_API_SECRET;
+    res.send(`
+        <body style="font-family: sans-serif; padding: 2rem;">
+        <h1>Cloudinary Configuration Check</h1>
+        <div style="background: #f1f5f9; padding: 1.5rem; border-radius: 0.5rem; border: 1px solid #cbd5e1;">
+            <p><strong>CLOUDINARY_CLOUD_NAME:</strong> ${process.env.CLOUDINARY_CLOUD_NAME ? '<span style="color:green">✅ SET</span>' : '<span style="color:red">❌ MISSING</span>'}</p>
+            <p><strong>CLOUDINARY_API_KEY:</strong> ${process.env.CLOUDINARY_API_KEY ? '<span style="color:green">✅ SET</span>' : '<span style="color:red">❌ MISSING</span>'}</p>
+            <p><strong>CLOUDINARY_API_SECRET:</strong> ${process.env.CLOUDINARY_API_SECRET ? '<span style="color:green">✅ SET</span>' : '<span style="color:red">❌ MISSING</span>'}</p>
+        </div>
+        <br>
+        <h2>Status: ${isConfigured 
+            ? '<span style="color:green">ACTIVE (Safe)</span>' 
+            : '<span style="color:red">INACTIVE (Disk Mode - Unsafe)</span>'}
+        </h2>
+        <p>${isConfigured ? 'Files will be saved to Cloudinary.' : 'You must add the MISSING variables in Render Dashboard > Environment.'}</p>
+        </body>
+    `);
+});
+
 // Routes
 app.use('/admin', require('./routes/admin'));
 app.use('/', require('./routes/index'));
