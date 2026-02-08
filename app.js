@@ -74,21 +74,31 @@ app.use((req, res, next) => {
 
 // DEBUG ROUTE - REMOVE IN PRODUCTION
 app.get('/config-check', (req, res) => {
-    const isConfigured = process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY && process.env.CLOUDINARY_API_SECRET;
+    const isCloudinarySet = process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY && process.env.CLOUDINARY_API_SECRET;
+    const isMongoAtlas = process.env.MONGO_URI && process.env.MONGO_URI.includes('mongodb+srv');
+    
+    const dbState = mongoose.connection.readyState; // 0: disconnected, 1: connected, 2: connecting, 3: disconnecting
+    const dbStatus = dbState === 1 ? '<span style="color:green">✅ CONNECTED</span>' : '<span style="color:red">❌ DISCONNECTED</span>';
+
     res.send(`
         <body style="font-family: sans-serif; padding: 2rem;">
-        <h1>Cloudinary Configuration Check</h1>
-        <div style="background: #f1f5f9; padding: 1.5rem; border-radius: 0.5rem; border: 1px solid #cbd5e1;">
-            <p><strong>CLOUDINARY_CLOUD_NAME:</strong> ${process.env.CLOUDINARY_CLOUD_NAME ? '<span style="color:green">✅ SET</span>' : '<span style="color:red">❌ MISSING</span>'}</p>
-            <p><strong>CLOUDINARY_API_KEY:</strong> ${process.env.CLOUDINARY_API_KEY ? '<span style="color:green">✅ SET</span>' : '<span style="color:red">❌ MISSING</span>'}</p>
-            <p><strong>CLOUDINARY_API_SECRET:</strong> ${process.env.CLOUDINARY_API_SECRET ? '<span style="color:green">✅ SET</span>' : '<span style="color:red">❌ MISSING</span>'}</p>
+        <h1>System Configuration Check</h1>
+        
+        <div style="background: #f1f5f9; padding: 1.5rem; border-radius: 0.5rem; border: 1px solid #cbd5e1; margin-bottom: 2rem;">
+            <h3>1. Cloudinary (PDF Storage)</h3>
+            <p><strong>Cloud Name:</strong> ${process.env.CLOUDINARY_CLOUD_NAME ? '✅ Set' : '❌ Missing'}</p>
+            <p><strong>Status:</strong> ${isCloudinarySet ? '<span style="color:green">ACTIVE (Permanent Files)</span>' : '<span style="color:red">INACTIVE (Files will delete on restart)</span>'}</p>
         </div>
+
+        <div style="background: #e2e8f0; padding: 1.5rem; border-radius: 0.5rem; border: 1px solid #cbd5e1;">
+            <h3>2. MongoDB (Login/Data Storage)</h3>
+            <p><strong>Connection Status:</strong> ${dbStatus}</p>
+            <p><strong>Database Type:</strong> ${isMongoAtlas ? '<span style="color:green">✅ CLOUD (Permanent Data)</span>' : '<span style="color:red">⚠️ LOCAL/DISK (Data deletes on restart)</span>'}</p>
+            <p style="font-size: 0.9rem;">(If Database Type is LOCAL, your Admin account will be deleted every time Render restarts.)</p>
+        </div>
+
         <br>
-        <h2>Status: ${isConfigured 
-            ? '<span style="color:green">ACTIVE (Safe)</span>' 
-            : '<span style="color:red">INACTIVE (Disk Mode - Unsafe)</span>'}
-        </h2>
-        <p>${isConfigured ? 'Files will be saved to Cloudinary.' : 'You must add the MISSING variables in Render Dashboard > Environment.'}</p>
+        <a href="/MONGODB_SETUP.md" target="_blank" style="color: blue;">read how to fix MongoDB</a>
         </body>
     `);
 });
