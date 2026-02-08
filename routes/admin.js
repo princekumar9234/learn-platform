@@ -136,7 +136,25 @@ router.get('/resource/add', (req, res) => {
     res.render('admin-add-resource', { error: null });
 });
 
-router.post('/resource/add', upload.single('pdf'), async (req, res) => {
+router.post('/resource/add', (req, res, next) => {
+    if (!process.env.CLOUDINARY_CLOUD_NAME) {
+         return res.send(`
+            <div style="font-family: sans-serif; padding: 2rem; max-width: 600px; margin: 0 auto; text-align: center;">
+                <h1 style="color: #ef4444;">🛑 Upload Configuration Error</h1>
+                <p>The server is trying to use <strong>Disk Storage</strong> because Cloudinary keys are missing.</p>
+                <p>To solve this, you MUST go to <strong>Render Dashboard > Environment</strong> and add:</p>
+                <ul style="text-align: left; background: #eee; padding: 1rem; border-radius: 8px;">
+                    <li>CLOUDINARY_CLOUD_NAME</li>
+                    <li>CLOUDINARY_API_KEY</li>
+                    <li>CLOUDINARY_API_SECRET</li>
+                </ul>
+                <p>Once added, the server will restart and this error will disappear.</p>
+                <a href="/admin/dashboard" style="display:inline-block; padding:10px 20px; background:#000; color:#fff; text-decoration:none; border-radius:5px;">Go Back</a>
+            </div>
+         `);
+    }
+    next();
+}, upload.single('pdf'), async (req, res) => {
     try {
         const { title, description, type, category } = req.body;
         let url = req.body.url;
@@ -173,7 +191,25 @@ router.get('/resource/edit/:id', async (req, res) => {
     }
 });
 
-router.post('/resource/edit/:id', upload.single('pdf'), async (req, res) => {
+router.post('/resource/edit/:id', (req, res, next) => {
+    if (!process.env.CLOUDINARY_CLOUD_NAME) {
+         return res.send(`
+            <div style="font-family: sans-serif; padding: 2rem; max-width: 600px; margin: 0 auto; text-align: center;">
+                <h1 style="color: #ef4444;">🛑 Upload Configuration Error</h1>
+                <p>The server is trying to use <strong>Disk Storage</strong> because Cloudinary keys are missing.</p>
+                <p>To solve this, you MUST go to <strong>Render Dashboard > Environment</strong> and add:</p>
+                <ul style="text-align: left; background: #eee; padding: 1rem; border-radius: 8px;">
+                    <li>CLOUDINARY_CLOUD_NAME</li>
+                    <li>CLOUDINARY_API_KEY</li>
+                    <li>CLOUDINARY_API_SECRET</li>
+                </ul>
+                <p>Once added, the server will restart and this error will disappear.</p>
+                <a href="/admin/dashboard" style="display:inline-block; padding:10px 20px; background:#000; color:#fff; text-decoration:none; border-radius:5px;">Go Back</a>
+            </div>
+         `);
+    }
+    next();
+}, upload.single('pdf'), async (req, res) => {
     try {
         const { title, description, type, category } = req.body;
         let url = req.body.url;
