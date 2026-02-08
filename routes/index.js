@@ -3,7 +3,34 @@ const router = express.Router();
 const Student = require('../models/Student');
 const Resource = require('../models/Resource');
 const bcrypt = require('bcrypt');
+const https = require('https');
 const { ensureStudent, checkBlocked } = require('../middleware/auth');
+
+// Force Inline PDF Proxy Route
+router.get('/view-pdf/:id', ensureStudent, async (req, res) => {
+    try {
+        const resource = await Resource.findById(req.params.id);
+        if (!resource || resource.type !== 'pdf') {
+            return res.status(404).send('PDF not found');
+        }
+
+        https.get(resource.url, (stream) => {
+            if (stream.statusCode !== 200) {
+                return res.status(stream.statusCode).send('Error fetching PDF from storage');
+            }
+            // Force browser to treat it as a PDF and show inline
+            res.setHeader('Content-Type', 'application/pdf');
+            res.setHeader('Content-Disposition', 'inline');
+            stream.pipe(res);
+        }).on('error', (err) => {
+            console.error('PDF Proxy Error:', err);
+            res.status(500).send('Error loading PDF');
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Server Error');
+    }
+});
 
 // Public Routes
 router.get('/', (req, res) => {

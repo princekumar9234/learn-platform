@@ -117,9 +117,15 @@
                             <h3 class="card-title" style="font-size: 1.1rem;"><%= resource.title %></h3>
                             <p class="card-desc" style="font-size: 0.9rem;"><%= resource.description %></p>
                         </div>
-                        <a href="<%= resource.url %>" target="_blank" class="btn btn-primary" style="width: 100%; text-align: center; margin-top: 1rem;">
-                            Open Resource
-                        </a>
+                        <% if (resource.type === 'pdf') { %>
+                            <a href="/view-pdf/<%= resource._id %>" target="_blank" class="btn btn-primary" style="width: 100%; text-align: center; margin-top: 1rem;">
+                                View PDF
+                            </a>
+                        <% } else { %>
+                            <a href="<%= resource.url %>" target="_blank" class="btn btn-primary" style="width: 100%; text-align: center; margin-top: 1rem;">
+                                Open Resource
+                            </a>
+                        <% } %>
                     </div>
                 <% } %>
             <% }) %>
