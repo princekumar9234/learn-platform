@@ -51,11 +51,7 @@ if (!process.env.MONGO_URI) {
 }
 
 // Session Config
-let MongoStore = require('connect-mongo');
-// Handle default export compatibility
-if (MongoStore.default) {
-    MongoStore = MongoStore.default;
-}
+const MongoStore = require('connect-mongo');
 
 // Session Config with MongoDB Store
 app.use(session({
