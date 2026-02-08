@@ -51,7 +51,11 @@ if (!process.env.MONGO_URI) {
 }
 
 // Session Config
-const MongoStore = require('connect-mongo');
+let MongoStore = require('connect-mongo');
+// Handle default export compatibility
+if (MongoStore.default) {
+    MongoStore = MongoStore.default;
+}
 
 // Session Config with MongoDB Store
 app.use(session({
@@ -59,7 +63,8 @@ app.use(session({
     resave: false,
     saveUninitialized: false,
     store: MongoStore.create({ 
-        mongoUrl: process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/learn-platform' 
+        mongoUrl: process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/learn-platform',
+        ttl: 14 * 24 * 60 * 60 // 14 days
     }),
     cookie: { 
         secure: process.env.NODE_ENV === 'production', 
