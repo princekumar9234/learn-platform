@@ -51,10 +51,16 @@ if (!process.env.MONGO_URI) {
 }
 
 // Session Config
+const MongoStore = require('connect-mongo');
+
+// Session Config with MongoDB Store
 app.use(session({
     secret: process.env.SESSION_SECRET || 'devsecretkey',
     resave: false,
     saveUninitialized: false,
+    store: MongoStore.create({ 
+        mongoUrl: process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/learn-platform' 
+    }),
     cookie: { 
         secure: process.env.NODE_ENV === 'production', 
         maxAge: 1000 * 60 * 60 * 24 // 1 day
