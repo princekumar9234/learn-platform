@@ -102,10 +102,9 @@ if (process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY && proce
         cloudinary: cloudinary,
         params: {
             folder: 'learn-platform-uploads',
-            allowed_formats: ['pdf'],
-            resource_type: 'auto',
-            use_filename: true,
-            unique_filename: true
+            resource_type: 'raw', // Force 'raw' for PDFs to avoid 'image' security issues
+            public_id: (req, file) => 'pdf-' + Date.now() + '-' + file.originalname.replace(/[^a-zA-Z0-9]/g, '_'),
+            flags: 'attachment:false' // Encourages browser viewing instead of download
         }
     });
 } else {
