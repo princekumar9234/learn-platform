@@ -75,6 +75,16 @@ a {
     color: white;
 }
 
+.btn-warning {
+    background-color: #f59e0b;
+    color: white;
+}
+
+.btn-success {
+    background-color: var(--success);
+    color: white;
+}
+
 .btn-outline {
     border: 1px solid var(--primary);
     color: var(--primary);

@@ -1,0 +1,66 @@
+<%- include('partials/header') %>
+
+<div class="container">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem;">
+        <h1>Manage Categories</h1>
+        <a href="/admin/dashboard" class="btn btn-outline">&larr; Back to Dashboard</a>
+    </div>
+
+    <div class="card" style="margin-bottom: 2rem; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.05);">
+        <p style="color: var(--text-muted); font-size: 0.95rem;">
+            Setting a password for a category will require users to enter it before they can see the resources in that category. 
+            Leave the password blank to disable protection.
+        </p>
+    </div>
+
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Category Name</th>
+                    <th>Status</th>
+                    <th>Password</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% categories.forEach(cat => { %>
+                    <tr>
+                        <td style="font-weight: 600; color: var(--primary);"><%= cat.name %></td>
+                        <td>
+                            <% if (cat.password) { %>
+                                <span class="status-badge" style="background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2);">
+                                    <ion-icon name="lock-closed-outline" style="vertical-align: middle; margin-right: 4px;"></ion-icon> Protected
+                                </span>
+                            <% } else { %>
+                                <span class="status-badge" style="background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.2);">
+                                    <ion-icon name="lock-open-outline" style="vertical-align: middle; margin-right: 4px;"></ion-icon> Public
+                                </span>
+                            <% } %>
+                        </td>
+                        <td>
+                            <form action="/admin/categories/update-password" method="POST" style="display: flex; gap: 0.5rem; align-items: center;">
+                                <input type="hidden" name="categoryId" value="<%= cat._id %>">
+                                <input type="text" name="password" placeholder="No password set" value="<%= cat.password || '' %>" 
+                                       style="padding: 0.4rem 0.8rem; border-radius: 6px; border: 1px solid rgba(255, 255, 255, 0.1); background: rgba(255,255,255,0.05); color: white; width: 180px;">
+                                <button type="submit" class="btn btn-primary" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">Save</button>
+                            </form>
+                        </td>
+                        <td>
+                            <span style="color: var(--text-muted); font-size: 0.85rem;">
+                                <%= cat.name.toLowerCase() === 'projects' ? 'System Category' : 'User Category' %>
+                            </span>
+                        </td>
+                    </tr>
+                <% }) %>
+                <% if (categories.length === 0) { %>
+                    <tr>
+                        <td colspan="4" style="text-align: center; padding: 2rem; color: var(--text-muted);">No categories found. Add resources to see categories here.</td>
+                    </tr>
+                <% } %>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<%- include('partials/footer') %>

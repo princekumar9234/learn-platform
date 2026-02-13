@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Student = require('../models/Student');
 const Resource = require('../models/Resource');
+const Category = require('../models/Category');
 const bcrypt = require('bcrypt');
 const https = require('https');
 const { ensureStudent, checkBlocked } = require('../middleware/auth');
@@ -115,16 +116,56 @@ router.get('/dashboard', async (req, res) => {
     const defaultCategories = ['HTML', 'CSS', 'Javascript', 'Node.js', 'MongoDB', 'Projects'];
     
     // Merge and unique
-    const allCategories = [...new Set([...defaultCategories, ...distinctCategories])];
+    const catNames = [...new Set([...defaultCategories, ...distinctCategories])];
     
-    res.render('dashboard', { student, categories: allCategories });
+    // Fetch protection info for these categories
+    const categoryInfo = await Category.find({ name: { $in: catNames } });
+    const protectedCategories = categoryInfo.filter(c => c.password).map(c => c.name);
+    const unlockedCategories = req.session.unlockedCategories || [];
+    
+    res.render('dashboard', { 
+        student, 
+        categories: catNames, 
+        protectedCategories,
+        unlockedCategories
+    });
 });
 
 router.get('/category/:name', async (req, res) => {
     const categoryName = req.params.name;
-    const resources = await Resource.find({ category: categoryName }).sort('-createdAt');
+    const category = await Category.findOne({ name: categoryName });
     const student = await Student.findById(req.session.studentId);
+
+    // If category has a password and it's not in the user's unlocked list
+    if (category && category.password) {
+        const unlocked = req.session.unlockedCategories || [];
+        if (!unlocked.includes(categoryName)) {
+            return res.render('category-lock', { category: categoryName, error: null, student });
+        }
+    }
+
+    const resources = await Resource.find({ category: categoryName }).sort('-createdAt');
     res.render('category', { category: categoryName, resources, student });
+});
+
+router.post('/category/:name/unlock', async (req, res) => {
+    const categoryName = req.params.name;
+    const { password } = req.body;
+    const student = await Student.findById(req.session.studentId);
+    
+    const category = await Category.findOne({ name: categoryName });
+    
+    if (category && category.password === password) {
+        if (!req.session.unlockedCategories) {
+            req.session.unlockedCategories = [];
+        }
+        if (!req.session.unlockedCategories.includes(categoryName)) {
+            req.session.unlockedCategories.push(categoryName);
+        }
+        return res.redirect(`/category/${categoryName}`);
+    } else {
+        return res.render('category-lock', { category: categoryName, error: 'Incorrect Password', student });
+    }
 });
 
 module.exports = router;

@@ -22,12 +22,21 @@
 
         <% categories.forEach(catName => { 
             const meta = categoryMeta[catName] || { icon: 'folder-open-outline', desc: 'Explore resources' };
+            const isProtected = protectedCategories.includes(catName);
+            const isUnlocked = unlockedCategories.includes(catName);
         %>
-            <div class="card">
+            <div class="card" style="position: relative;">
+                <% if (isProtected) { %>
+                    <div style="position: absolute; top: 1rem; right: 1rem; color: <%= isUnlocked ? 'var(--success)' : 'var(--danger)' %>; font-size: 1.2rem;">
+                        <ion-icon name="<%= isUnlocked ? 'lock-open-outline' : 'lock-closed' %>"></ion-icon>
+                    </div>
+                <% } %>
                 <div class="card-icon"><ion-icon name="<%= meta.icon %>"></ion-icon></div>
                 <h3 class="card-title"><%= catName %></h3>
                 <p class="card-desc"><%= meta.desc %></p>
-                <a href="/category/<%= catName %>" class="btn btn-outline" style="text-align: center;">View Resources</a>
+                <a href="/category/<%= catName %>" class="btn <%= isProtected && !isUnlocked ? 'btn-danger' : 'btn-outline' %>" style="text-align: center;">
+                    <%= isProtected && !isUnlocked ? 'Unlock Access' : 'View Resources' %>
+                </a>
             </div>
         <% }) %>
     </div>

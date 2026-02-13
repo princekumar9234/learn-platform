@@ -3,6 +3,7 @@ const router = express.Router();
 const Admin = require('../models/Admin');
 const Student = require('../models/Student');
 const Resource = require('../models/Resource');
+const Category = require('../models/Category');
 const bcrypt = require('bcrypt');
 const { ensureAdmin } = require('../middleware/auth');
 
@@ -62,8 +63,20 @@ router.use(ensureAdmin);
 router.get('/dashboard', async (req, res) => {
     const studentCount = await Student.countDocuments();
     const resourceCount = await Resource.countDocuments();
+    
+    // Get distinct categories from resources
+    const distinctCategoriesInResources = await Resource.distinct('category');
+    // Ensure all these categories exist in the Category model
+    for (const catName of distinctCategoriesInResources) {
+        const exists = await Category.findOne({ name: catName });
+        if (!exists) {
+            await Category.create({ name: catName });
+        }
+    }
+    const categoryCount = await Category.countDocuments();
+    
     const resources = await Resource.find().sort('-createdAt').limit(5); // Recent resources
-    res.render('admin-dashboard', { studentCount, resourceCount, recentResources: resources });
+    res.render('admin-dashboard', { studentCount, resourceCount, categoryCount, recentResources: resources });
 });
 
 // All Resources Page
@@ -259,11 +272,37 @@ router.get('/students', async (req, res) => {
     res.render('admin-students', { students });
 });
 
-router.post('/block/:id', async (req, res) => {
-    const student = await Student.findById(req.params.id);
-    student.isBlocked = !student.isBlocked;
-    await student.save();
-    res.redirect('/admin/students');
+// Category Management
+router.get('/categories', async (req, res) => {
+    try {
+        // First sync categories from resources just in case
+        const distinctCategoriesInResources = await Resource.distinct('category');
+        for (const catName of distinctCategoriesInResources) {
+            const exists = await Category.findOne({ name: catName });
+            if (!exists) {
+                await Category.create({ name: catName });
+            }
+        }
+        
+        const categories = await Category.find().sort('name');
+        res.render('admin-categories', { categories, error: null });
+    } catch (err) {
+        console.error(err);
+        res.redirect('/admin/dashboard');
+    }
+});
+
+router.post('/categories/update-password', async (req, res) => {
+    try {
+        const { categoryId, password } = req.body;
+        // Find by id and update password. If password is empty string, set it to null
+        const updateData = { password: password === '' ? null : password };
+        await Category.findByIdAndUpdate(categoryId, updateData);
+        res.redirect('/admin/categories');
+    } catch (err) {
+        console.error(err);
+        res.redirect('/admin/categories');
+    }
 });
 
 module.exports = router;
