@@ -21,28 +21,35 @@
                 <tbody>
                     <% resources.forEach(res => { %>
                         <tr>
-                            <td><%= res.title %></td>
+                            <td>
+                                <a href="<%= res.url %>" target="_blank" style="color: inherit; text-decoration: none; font-weight: 500;" title="View Resource">
+                                    <%= res.title %> <ion-icon name="open-outline" style="font-size: 0.8rem; vertical-align: middle; margin-left: 2px; opacity: 0.6;"></ion-icon>
+                                </a>
+                            </td>
                             <td><span class="status-badge" style="background: rgba(99,102,241,0.2); color: var(--primary);"><%= res.category %></span></td>
                             <td style="text-transform: capitalize;">
-                                <% if (res.type === 'pdf') { %>
-                                    <span class="status-badge" style="background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px;">
-                                        <ion-icon name="document-text-outline" style="font-size: 1.1rem;"></ion-icon> PDF
-                                    </span>
-                                <% } else if (res.type === 'video') { %>
-                                    <span class="status-badge" style="background: rgba(59, 130, 246, 0.15); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.2); display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px;">
-                                        <ion-icon name="play-circle-outline" style="font-size: 1.1rem;"></ion-icon> Video
-                                    </span>
-                                <% } else { %>
-                                    <span class="status-badge" style="background: rgba(107, 114, 128, 0.15); color: #6b7280; border: 1px solid rgba(107, 114, 128, 0.2); padding: 4px 10px;">
-                                        <%= res.type %>
-                                    </span>
-                                <% } %>
+                                <a href="<%= res.url %>" target="_blank" style="text-decoration: none;" title="Open <%= res.type %>">
+                                    <% if (res.type === 'pdf') { %>
+                                        <span class="status-badge" style="background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; cursor: pointer;">
+                                            <ion-icon name="document-text-outline" style="font-size: 1.1rem;"></ion-icon> PDF
+                                        </span>
+                                    <% } else if (res.type === 'video') { %>
+                                        <span class="status-badge" style="background: rgba(59, 130, 246, 0.15); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.2); display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; cursor: pointer;">
+                                            <ion-icon name="play-circle-outline" style="font-size: 1.1rem;"></ion-icon> Video
+                                        </span>
+                                    <% } else { %>
+                                        <span class="status-badge" style="background: rgba(107, 114, 128, 0.15); color: #6b7280; border: 1px solid rgba(107, 114, 128, 0.2); padding: 4px 10px; cursor: pointer;">
+                                            <%= res.type %>
+                                        </span>
+                                    <% } %>
+                                </a>
                             </td>
                             <td><%= new Date(res.createdAt).toLocaleDateString() %></td>
                             <td>
-                                <a href="/admin/resource/edit/<%= res._id %>" class="btn btn-outline" style="padding: 0.25rem 0.5rem; font-size: 0.8rem;">Edit</a>
+                                <a href="<%= res.url %>" target="_blank" class="btn btn-outline" style="padding: 0.25rem 0.5rem; font-size: 0.8rem; background: rgba(16, 185, 129, 0.1); color: #10b981; border-color: rgba(16, 185, 129, 0.2);">View</a>
+                                <a href="/admin/resource/edit/<%= res._id %>" class="btn btn-outline" style="padding: 0.25rem 0.5rem; font-size: 0.8rem; margin-left: 0.25rem;">Edit</a>
                                 <form action="/admin/resource/delete/<%= res._id %>" method="POST" style="display: inline;">
-                                    <button type="submit" class="btn btn-danger" style="padding: 0.25rem 0.5rem; font-size: 0.8rem; margin-left: 0.5rem;" onclick="return confirm('Delete this resource?')">Delete</button>
+                                    <button type="submit" class="btn btn-danger" style="padding: 0.25rem 0.5rem; font-size: 0.8rem; margin-left: 0.25rem;" onclick="return confirm('Delete this resource?')">Delete</button>
                                 </form>
                             </td>
                         </tr>
