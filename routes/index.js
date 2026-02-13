@@ -33,6 +33,46 @@ router.get('/view-pdf/:id', ensureStudent, async (req, res) => {
     }
 });
 
+// Video Player Route
+router.get('/view-video/:id', async (req, res) => {
+    try {
+        const resource = await Resource.findById(req.params.id);
+        if (!resource || resource.type !== 'video') {
+            return res.status(404).send('Video not found');
+        }
+
+        const getYouTubeId = (url) => {
+            try {
+                const urlStr = url.startsWith('http') ? url : 'https://' + url;
+                const urlObj = new URL(urlStr);
+                if (urlObj.hostname.includes('youtu.be')) return urlObj.pathname.slice(1);
+                if (urlObj.pathname.includes('/embed/')) return urlObj.pathname.split('/embed/')[1].split('?')[0];
+                const v = urlObj.searchParams.get('v');
+                if (v) return v;
+                const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+                const match = url.match(regExp);
+                return (match && match[2].length === 11) ? match[2] : null;
+            } catch(e) { return null; }
+        };
+
+        const getYouTubePlaylistId = (url) => {
+            try {
+                const urlStr = url.startsWith('http') ? url : 'https://' + url;
+                const urlObj = new URL(urlStr);
+                return urlObj.searchParams.get('list');
+            } catch(e) { return null; }
+        };
+
+        const ytId = getYouTubeId(resource.url);
+        const ytPlaylistId = getYouTubePlaylistId(resource.url);
+
+        res.render('view-video', { resource, ytId, ytPlaylistId });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Server Error');
+    }
+});
+
 // Public Routes
 router.get('/', (req, res) => {
     res.render('landing', { student: req.session.studentId });

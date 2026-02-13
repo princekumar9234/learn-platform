@@ -121,6 +121,10 @@
                             <a href="/view-pdf/<%= resource._id %>" target="_blank" class="btn btn-primary" style="width: 100%; text-align: center; margin-top: 1rem;">
                                 View PDF
                             </a>
+                        <% } else if (resource.type === 'video') { %>
+                            <a href="/view-video/<%= resource._id %>" target="_blank" class="btn btn-primary" style="width: 100%; text-align: center; margin-top: 1rem;">
+                                View Video
+                            </a>
                         <% } else { %>
                             <a href="<%= resource.url %>" target="_blank" class="btn btn-primary" style="width: 100%; text-align: center; margin-top: 1rem;">
                                 Open Resource
