@@ -45,13 +45,13 @@ router.get('/signup', (req, res) => {
 router.post('/signup', async (req, res) => {
     try {
         console.log('Signup params:', req.body);
-        const { name, email, password } = req.body;
+        const { name, email, password, secretPin } = req.body;
         const existing = await Student.findOne({ email });
         if (existing) {
             console.log('Signup fail: Exists');
             return res.render('signup', { error: 'Email already exists' });
         }
-        const student = new Student({ name, email, password });
+        const student = new Student({ name, email, password, secretPin });
         await student.save();
         console.log('Signup Success:', student._id);
         req.session.studentId = student._id;
@@ -62,8 +62,54 @@ router.post('/signup', async (req, res) => {
     }
 });
 
+// Forgot Password Routes
+router.get('/forgot-password', (req, res) => {
+    res.render('forgot-password', { error: null, success: null });
+});
+
+router.post('/forgot-password', async (req, res) => {
+    try {
+        const { email, secretPin } = req.body;
+        const student = await Student.findOne({ email });
+        
+        if (!student) {
+            return res.render('forgot-password', { error: 'User not found', success: null });
+        }
+        
+        if (student.secretPin !== secretPin) {
+            return res.render('forgot-password', { error: 'Incorrect Secret PIN', success: null });
+        }
+        
+        // If matched, render the reset page with email and PIN passed (hidden inputs) for verification in next step
+        res.render('reset-password', { email, secretPin, error: null });
+    } catch (err) {
+        console.error('Forgot PW Error:', err);
+        res.render('forgot-password', { error: 'Something went wrong', success: null });
+    }
+});
+
+router.post('/reset-password', async (req, res) => {
+    try {
+        const { email, secretPin, password } = req.body;
+        const student = await Student.findOne({ email, secretPin });
+        
+        if (!student) {
+            return res.redirect('/forgot-password');
+        }
+        
+        // Use pre-save hook for hashing by just assigning the plain password
+        student.password = password;
+        await student.save();
+        
+        res.render('login', { error: null, success: 'Password reset successfully! Please login.' });
+    } catch (err) {
+        console.error('Reset PW Error:', err);
+        res.render('forgot-password', { error: 'Error resetting password', success: null });
+    }
+});
+
 router.get('/login', (req, res) => {
-    res.render('login', { error: null }); 
+    res.render('login', { error: null, success: req.query.success || null }); 
 });
 
 router.post('/login', async (req, res) => {

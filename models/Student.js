@@ -19,6 +19,10 @@ const studentSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
+    secretPin: {
+        type: String,
+        required: true
+    },
     createdAt: {
         type: Date,
         default: Date.now
