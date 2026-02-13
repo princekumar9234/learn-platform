@@ -17,7 +17,12 @@
     <nav class="navbar">
         <div class="nav-container">
             <a href="/" class="logo">Prince.Dev</a>
-            <ul class="nav-links">
+            
+            <button class="mobile-menu-toggle" id="menuToggle">
+                <ion-icon name="menu-outline"></ion-icon>
+            </button>
+
+            <ul class="nav-links" id="navLinks">
                 <% if (typeof user !== 'undefined' && user) { %>
                     <li><a href="/dashboard" class="nav-link">Dashboard</a></li>
                     <li><a href="/logout" class="nav-link">Logout</a></li>
@@ -31,4 +36,22 @@
             </ul>
         </div>
     </nav>
+    <script>
+        const menuToggle = document.getElementById('menuToggle');
+        const navLinks = document.getElementById('navLinks');
+        
+        menuToggle.addEventListener('click', () => {
+            navLinks.classList.toggle('active');
+            const icon = menuToggle.querySelector('ion-icon');
+            icon.setAttribute('name', navLinks.classList.contains('active') ? 'close-outline' : 'menu-outline');
+        });
+
+        // Close menu when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!menuToggle.contains(e.target) && !navLinks.contains(e.target)) {
+                navLinks.classList.remove('active');
+                menuToggle.querySelector('ion-icon').setAttribute('name', 'menu-outline');
+            }
+        });
+    </script>
     <main>
