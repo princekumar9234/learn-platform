@@ -133,27 +133,41 @@ if (process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY && proce
 
 const upload = multer({ 
     storage: storage,
+    limits: { fileSize: 20 * 1024 * 1024 }, // 20MB max
     fileFilter: function (req, file, cb) {
         if (file.mimetype === 'application/pdf') {
             cb(null, true);
         } else {
-            cb(new Error('Only PDF files are allowed!'), false);
+            cb(new Error('Only PDF files are allowed! Please select a .pdf file.'), false);
         }
     }
 });
+
+// Helper: Run multer upload as a Promise to catch errors properly
+function runUpload(req, res) {
+    return new Promise((resolve, reject) => {
+        upload.single('pdf')(req, res, (err) => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve();
+            }
+        });
+    });
+}
 
 // Resource Management
 router.get('/resource/add', (req, res) => {
     res.render('admin-add-resource', { error: null });
 });
 
-router.post('/resource/add', (req, res, next) => {
+router.post('/resource/add', async (req, res) => {
     if (!process.env.CLOUDINARY_CLOUD_NAME) {
          return res.send(`
             <div style="font-family: sans-serif; padding: 2rem; max-width: 600px; margin: 0 auto; text-align: center;">
                 <h1 style="color: #ef4444;">🛑 Upload Configuration Error</h1>
                 <p>The server is trying to use <strong>Disk Storage</strong> because Cloudinary keys are missing.</p>
-                <p>To solve this, you MUST go to <strong>Render Dashboard > Environment</strong> and add:</p>
+                <p>To solve this, you MUST go to <strong>Render Dashboard &gt; Environment</strong> and add:</p>
                 <ul style="text-align: left; background: #eee; padding: 1rem; border-radius: 8px;">
                     <li>CLOUDINARY_CLOUD_NAME</li>
                     <li>CLOUDINARY_API_KEY</li>
@@ -164,9 +178,11 @@ router.post('/resource/add', (req, res, next) => {
             </div>
          `);
     }
-    next();
-}, upload.single('pdf'), async (req, res) => {
+    
     try {
+        // Run multer upload safely (catches file type errors, size errors, Cloudinary errors)
+        await runUpload(req, res);
+
         const { title, description, type, category } = req.body;
         let url = req.body.url;
 
@@ -174,7 +190,10 @@ router.post('/resource/add', (req, res, next) => {
         if (req.file) {
             if (req.file.path && req.file.path.startsWith('http')) {
                 // Cloudinary returns a full URL in 'path'
-                 url = req.file.path;
+                url = req.file.path;
+            } else if (req.file.secure_url) {
+                // Some versions of multer-storage-cloudinary use secure_url
+                url = req.file.secure_url;
             } else {
                 // Disk storage returns a local path, we construct the URL
                 url = '/uploads/' + req.file.filename;
@@ -182,14 +201,25 @@ router.post('/resource/add', (req, res, next) => {
         }
 
         if (!url) {
-            throw new Error('URL or File is required');
+            throw new Error('URL ya PDF File zaroori hai! Kripya ek URL enter karein ya PDF file upload karein.');
         }
 
         await Resource.create({ title, description, type, url, category });
         res.redirect('/admin/dashboard');
     } catch (err) {
-        console.error('CLOUDINARY_UPLOAD_ERROR_DETAILS:', err);
-        res.render('admin-add-resource', { error: err.message });
+        console.error('RESOURCE_ADD_ERROR:', err.message);
+        
+        // User-friendly error messages
+        let userMessage = err.message;
+        if (err.message && err.message.toLowerCase().includes('timeout')) {
+            userMessage = 'Upload timeout ho gaya. Please dobara try karein ya choti file use karein.';
+        } else if (err.message && err.message.toLowerCase().includes('cloudinary')) {
+            userMessage = 'File upload mein problem aayi. Please kuch seconds baad dobara try karein.';
+        } else if (err.message && err.message.toLowerCase().includes('too large')) {
+            userMessage = 'PDF file size 20MB se zyada hai. Choti file use karein.';
+        }
+        
+        res.render('admin-add-resource', { error: userMessage });
     }
 });
 
@@ -202,13 +232,13 @@ router.get('/resource/edit/:id', async (req, res) => {
     }
 });
 
-router.post('/resource/edit/:id', (req, res, next) => {
+router.post('/resource/edit/:id', async (req, res) => {
     if (!process.env.CLOUDINARY_CLOUD_NAME) {
          return res.send(`
             <div style="font-family: sans-serif; padding: 2rem; max-width: 600px; margin: 0 auto; text-align: center;">
                 <h1 style="color: #ef4444;">🛑 Upload Configuration Error</h1>
                 <p>The server is trying to use <strong>Disk Storage</strong> because Cloudinary keys are missing.</p>
-                <p>To solve this, you MUST go to <strong>Render Dashboard > Environment</strong> and add:</p>
+                <p>To solve this, you MUST go to <strong>Render Dashboard &gt; Environment</strong> and add:</p>
                 <ul style="text-align: left; background: #eee; padding: 1rem; border-radius: 8px;">
                     <li>CLOUDINARY_CLOUD_NAME</li>
                     <li>CLOUDINARY_API_KEY</li>
@@ -219,16 +249,20 @@ router.post('/resource/edit/:id', (req, res, next) => {
             </div>
          `);
     }
-    next();
-}, upload.single('pdf'), async (req, res) => {
+
     try {
+        // Run multer upload safely
+        await runUpload(req, res);
+
         const { title, description, type, category } = req.body;
         let url = req.body.url;
 
         // If a file was uploaded, decide URL based on storage type
         if (req.file) {
             if (req.file.path && req.file.path.startsWith('http')) {
-                 url = req.file.path;
+                url = req.file.path;
+            } else if (req.file.secure_url) {
+                url = req.file.secure_url;
             } else {
                 url = '/uploads/' + req.file.filename;
             }
@@ -239,7 +273,7 @@ router.post('/resource/edit/:id', (req, res, next) => {
             throw new Error('URL is required for this resource type');
         }
         
-        // If type IS PDF, we might keep the old URL if no new file uploaded. 
+        // If type IS PDF, keep old URL if no new file uploaded
         if (type === 'pdf' && !req.file && !url) {
              const currentResource = await Resource.findById(req.params.id);
              if (currentResource) {
@@ -255,9 +289,17 @@ router.post('/resource/edit/:id', (req, res, next) => {
         await Resource.findByIdAndUpdate(req.params.id, updateData);
         res.redirect('/admin/dashboard');
     } catch (err) {
-        console.error(err);
+        console.error('RESOURCE_EDIT_ERROR:', err.message);
+        
+        let userMessage = err.message;
+        if (err.message && err.message.toLowerCase().includes('timeout')) {
+            userMessage = 'Upload timeout ho gaya. Please dobara try karein.';
+        } else if (err.message && err.message.toLowerCase().includes('too large')) {
+            userMessage = 'PDF file size 20MB se zyada hai. Choti file use karein.';
+        }
+        
         const resource = await Resource.findById(req.params.id);
-        res.render('admin-edit-resource', { resource, error: err.message });
+        res.render('admin-edit-resource', { resource, error: userMessage });
     }
 });
 
