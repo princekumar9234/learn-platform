@@ -133,7 +133,7 @@ if (process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY && proce
 
 const upload = multer({ 
     storage: storage,
-    limits: { fileSize: 20 * 1024 * 1024 }, // 20MB max
+    limits: { fileSize: 50 * 1024 * 1024 }, // 50MB max
     fileFilter: function (req, file, cb) {
         if (file.mimetype === 'application/pdf') {
             cb(null, true);
@@ -216,7 +216,7 @@ router.post('/resource/add', async (req, res) => {
         } else if (err.message && err.message.toLowerCase().includes('cloudinary')) {
             userMessage = 'File upload mein problem aayi. Please kuch seconds baad dobara try karein.';
         } else if (err.message && err.message.toLowerCase().includes('too large')) {
-            userMessage = 'PDF file size 20MB se zyada hai. Choti file use karein.';
+            userMessage = 'PDF file size 50MB se zyada hai. Choti file use karein.';
         }
         
         res.render('admin-add-resource', { error: userMessage });
@@ -295,7 +295,7 @@ router.post('/resource/edit/:id', async (req, res) => {
         if (err.message && err.message.toLowerCase().includes('timeout')) {
             userMessage = 'Upload timeout ho gaya. Please dobara try karein.';
         } else if (err.message && err.message.toLowerCase().includes('too large')) {
-            userMessage = 'PDF file size 20MB se zyada hai. Choti file use karein.';
+            userMessage = 'PDF file size 50MB se zyada hai. Choti file use karein.';
         }
         
         const resource = await Resource.findById(req.params.id);
