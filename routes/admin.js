@@ -61,22 +61,24 @@ router.get('/logout', (req, res) => {
 router.use(ensureAdmin);
 
 router.get('/dashboard', async (req, res) => {
-    const studentCount = await Student.countDocuments();
-    const resourceCount = await Resource.countDocuments();
-    
-    // Get distinct categories from resources
-    const distinctCategoriesInResources = await Resource.distinct('category');
-    // Ensure all these categories exist in the Category model
-    for (const catName of distinctCategoriesInResources) {
-        const exists = await Category.findOne({ name: catName });
-        if (!exists) {
-            await Category.create({ name: catName });
+    try {
+        const studentCount = await Student.countDocuments();
+        const resourceCount = await Resource.countDocuments();
+        
+        // Sync categories from resources
+        const distinctCategoriesInResources = await Resource.distinct('category');
+        for (const catName of distinctCategoriesInResources) {
+            const exists = await Category.findOne({ name: catName });
+            if (!exists) await Category.create({ name: catName });
         }
+        const categoryCount = await Category.countDocuments();
+        
+        const resources = await Resource.find().sort('-createdAt').limit(5);
+        res.render('admin-dashboard', { studentCount, resourceCount, categoryCount, recentResources: resources });
+    } catch (err) {
+        console.error('ADMIN_DASHBOARD_ERROR:', err);
+        res.status(500).send('Server Error. Please try again.');
     }
-    const categoryCount = await Category.countDocuments();
-    
-    const resources = await Resource.find().sort('-createdAt').limit(5); // Recent resources
-    res.render('admin-dashboard', { studentCount, resourceCount, categoryCount, recentResources: resources });
 });
 
 // All Resources Page
@@ -90,7 +92,6 @@ router.get('/resources', async (req, res) => {
     }
 });
 
-// Resource Management
 // Resource Management
 const multer = require('multer');
 const path = require('path');
@@ -356,14 +357,38 @@ router.post('/resource/edit/:id', async (req, res) => {
 });
 
 router.post('/resource/delete/:id', async (req, res) => {
-    await Resource.findByIdAndDelete(req.params.id);
-    res.redirect('/admin/dashboard');
+    try {
+        await Resource.findByIdAndDelete(req.params.id);
+        res.redirect('/admin/dashboard');
+    } catch (err) {
+        console.error('DELETE_ERROR:', err);
+        res.redirect('/admin/dashboard');
+    }
 });
 
 // Student Management
 router.get('/students', async (req, res) => {
-    const students = await Student.find().sort('-createdAt');
-    res.render('admin-students', { students });
+    try {
+        const students = await Student.find().sort('-createdAt');
+        res.render('admin-students', { students });
+    } catch (err) {
+        console.error('STUDENTS_ERROR:', err);
+        res.redirect('/admin/dashboard');
+    }
+});
+
+// Block / Unblock Student  ← CRITICAL: This route was MISSING
+router.post('/block/:id', async (req, res) => {
+    try {
+        const student = await Student.findById(req.params.id);
+        if (!student) return res.redirect('/admin/students');
+        student.isBlocked = !student.isBlocked; // Toggle
+        await student.save();
+        res.redirect('/admin/students');
+    } catch (err) {
+        console.error('BLOCK_STUDENT_ERROR:', err);
+        res.redirect('/admin/students');
+    }
 });
 
 // Category Management
