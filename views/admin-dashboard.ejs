@@ -8,27 +8,31 @@
             <div class="card-icon" style="color: var(--secondary);"><ion-icon name="people"></ion-icon></div>
             <h3 class="card-title"><%= studentCount %></h3>
             <p class="card-desc">Total Students</p>
-            <a href="/admin/students" class="btn btn-primary">Manage Students</a>
+            <div class="admin-card-buttons">
+                <a href="/admin/students" class="btn btn-primary">Manage Students</a>
+            </div>
         </div>
         <div class="card" style="text-align: center;">
-            <div class="card-icon" style="color: var(--warning); color: #f59e0b;"><ion-icon name="folder-open"></ion-icon></div>
+            <div class="card-icon" style="color: #f59e0b;"><ion-icon name="folder-open"></ion-icon></div>
             <h3 class="card-title"><%= categoryCount %></h3>
             <p class="card-desc">Categories</p>
-            <a href="/admin/categories" class="btn btn-warning" style="background-color: #f59e0b; color: white;">Manage Access</a>
+            <div class="admin-card-buttons">
+                <a href="/admin/categories" class="btn btn-warning" style="background-color: #f59e0b; color: white;">Manage Access</a>
+            </div>
         </div>
         <div class="card" style="text-align: center;">
             <div class="card-icon" style="color: var(--success);"><ion-icon name="library"></ion-icon></div>
             <h3 class="card-title"><%= resourceCount %></h3>
             <p class="card-desc">Total Resources</p>
-            <div style="display: flex; gap: 0.5rem; justify-content: center; margin-top: 1rem;">
-                <a href="/admin/resource/add" class="btn btn-success" style="background-color: var(--success); color: white; padding: 0.5rem 1rem; font-size: 0.9rem;">Add New</a>
-                <a href="/admin/resources" class="btn btn-outline" style="padding: 0.5rem 1rem; font-size: 0.9rem;">View All</a>
+            <div class="admin-card-buttons">
+                <a href="/admin/resource/add" class="btn btn-success" style="background-color: var(--success); color: white;">Add New</a>
+                <a href="/admin/resources" class="btn btn-outline">View All</a>
             </div>
         </div>
     </div>
 
-    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
-        <h2 style="margin: 0;">Recent Resources</h2>
+    <div class="page-header" style="margin-bottom: 1rem;">
+        <h2>Recent Resources</h2>
         <a href="/admin/resources" style="color: var(--primary); text-decoration: none; font-weight: 500;">View All &rarr;</a>
     </div>
     <div class="table-container">
@@ -68,11 +72,13 @@
                             </a>
                         </td>
                         <td>
-                            <a href="<%= res.type === 'video' ? '/view-video/' + res._id : (res.type === 'pdf' ? '/view-pdf/' + res._id : res.url) %>" target="_blank" class="btn btn-outline" style="padding: 0.25rem 0.5rem; font-size: 0.8rem; background: rgba(16, 185, 129, 0.1); color: #10b981; border-color: rgba(16, 185, 129, 0.2);">View</a>
-                            <a href="/admin/resource/edit/<%= res._id %>" class="btn btn-outline" style="padding: 0.25rem 0.5rem; font-size: 0.8rem; margin-left: 0.25rem;">Edit</a>
-                            <form action="/admin/resource/delete/<%= res._id %>" method="POST" style="display: inline;">
-                                <button type="submit" class="btn btn-danger" style="padding: 0.25rem 0.5rem; font-size: 0.8rem; margin-left: 0.25rem;" onclick="return confirm('Delete this resource?')">Delete</button>
-                            </form>
+                            <div class="action-buttons">
+                                <a href="<%= res.type === 'video' ? '/view-video/' + res._id : (res.type === 'pdf' ? '/view-pdf/' + res._id : res.url) %>" target="_blank" class="btn btn-outline" style="padding: 0.25rem 0.5rem; font-size: 0.8rem; background: rgba(16, 185, 129, 0.1); color: #10b981; border-color: rgba(16, 185, 129, 0.2);">View</a>
+                                <a href="/admin/resource/edit/<%= res._id %>" class="btn btn-outline" style="padding: 0.25rem 0.5rem; font-size: 0.8rem;">Edit</a>
+                                <form action="/admin/resource/delete/<%= res._id %>" method="POST" style="display: inline;">
+                                    <button type="submit" class="btn btn-danger" style="padding: 0.25rem 0.5rem; font-size: 0.8rem;" onclick="return confirm('Delete this resource?')">Delete</button>
+                                </form>
+                            </div>
                         </td>
                     </tr>
                 <% }) %>

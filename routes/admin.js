@@ -116,6 +116,7 @@ if (process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY && proce
         params: {
             folder: 'learn-platform-uploads',
             resource_type: 'auto',
+            chunk_size: 6000000, // 6MB chunks for reliable large file upload
             public_id: (req, file) => 'pdf-' + Date.now() + '-' + file.originalname.split('.')[0].replace(/[^a-zA-Z0-9]/g, '_')
         }
     });

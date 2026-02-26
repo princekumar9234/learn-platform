@@ -8,8 +8,8 @@ require('dotenv').config();
 const app = express();
 
 // Middleware
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
+app.use(express.urlencoded({ extended: true, limit: '100mb' }));
+app.use(express.json({ limit: '100mb' }));
 app.use(methodOverride('_method'));
 app.use(methodOverride('_method'));
 app.use(express.static(path.join(__dirname, 'public')));

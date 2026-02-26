@@ -204,7 +204,7 @@ a {
 /* Dashboard Cards */
 .grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 1.5rem;
     margin-top: 2rem;
 }
@@ -249,11 +249,13 @@ a {
     border-radius: 12px;
     padding: 1rem;
     margin-top: 2rem;
+    -webkit-overflow-scrolling: touch;
 }
 
 table {
     width: 100%;
     border-collapse: collapse;
+    min-width: 480px;
 }
 
 th, td {
@@ -265,6 +267,7 @@ th, td {
 th {
     color: var(--text-muted);
     font-weight: 500;
+    white-space: nowrap;
 }
 
 tr:last-child td {
@@ -329,6 +332,14 @@ tr:last-child td {
     margin: 0 auto 3rem;
 }
 
+/* Hero Buttons */
+.hero-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
 /* Resource Items */
 .resource-item {
     background: rgba(255, 255, 255, 0.02);
@@ -338,6 +349,8 @@ tr:last-child td {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
 }
 
 .resource-type {
@@ -346,6 +359,44 @@ tr:last-child td {
     letter-spacing: 1px;
     color: var(--secondary);
 }
+
+/* Page Headers (flex rows that need wrap on mobile) */
+.page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+/* Admin category password form */
+.category-password-form {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.category-password-input {
+    padding: 0.4rem 0.8rem;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255,255,255,0.05);
+    color: white;
+    width: 160px;
+    font-size: 0.9rem;
+    min-width: 0;
+}
+
+/* Action buttons in tables */
+.action-buttons {
+    display: flex;
+    gap: 0.3rem;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
 /* Mobile Menu Toggle */
 .mobile-menu-toggle {
     display: none;
@@ -357,11 +408,22 @@ tr:last-child td {
     z-index: 1001;
 }
 
+/* ===================== RESPONSIVE ===================== */
+
+/* Tablet (max 1024px) */
+@media (max-width: 1024px) {
+    .grid {
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    }
+}
+
+/* Mobile (max 768px) */
 @media (max-width: 768px) {
     .container {
-        padding: 1.5rem 1rem;
+        padding: 1.25rem 1rem;
     }
 
+    /* Mobile nav */
     .mobile-menu-toggle {
         display: block;
     }
@@ -370,12 +432,14 @@ tr:last-child td {
         position: fixed;
         top: 0;
         right: -100%;
-        width: 80%;
+        width: 75%;
+        max-width: 320px;
         height: 100vh;
         background: var(--bg-card);
         flex-direction: column;
         justify-content: center;
         align-items: center;
+        gap: 2rem;
         transition: 0.3s ease-in-out;
         box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5);
         z-index: 1000;
@@ -385,23 +449,46 @@ tr:last-child td {
         right: 0;
     }
 
+    .nav-links li a.btn {
+        width: 160px;
+        text-align: center;
+    }
+
+    /* Hero */
+    .hero {
+        padding: 4rem 1.5rem;
+    }
+
     .hero h1 {
-        font-size: 2.5rem;
+        font-size: 2.4rem;
     }
 
     .hero p {
-        font-size: 1.1rem;
+        font-size: 1rem;
     }
 
+    .hero-buttons {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .hero-buttons .btn {
+        width: 200px;
+        text-align: center;
+    }
+
+    /* Cards grid */
     .grid {
         grid-template-columns: 1fr;
     }
 
+    /* Forms */
     .form-container {
-        margin: 2rem 1rem;
+        margin: 1.5rem 1rem;
         padding: 1.5rem;
     }
 
+    /* Tables */
     .table-container {
         padding: 0.5rem;
         border-radius: 8px;
@@ -409,23 +496,95 @@ tr:last-child td {
 
     th, td {
         padding: 0.75rem 0.5rem;
-        font-size: 0.9rem;
+        font-size: 0.875rem;
     }
 
-    /* Stack buttons in tables on very small screens */
-    .btn-group-mobile {
+    /* Page headers */
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .page-header .btn {
+        width: 100%;
+        text-align: center;
+    }
+
+    /* Category password form */
+    .category-password-input {
+        width: 100%;
+    }
+
+    .category-password-form {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .category-password-form .btn {
+        width: 100%;
+    }
+
+    /* Admin dashboard stat cards */
+    .admin-card-buttons {
         display: flex;
         flex-direction: column;
         gap: 0.5rem;
+        width: 100%;
+    }
+
+    .admin-card-buttons .btn {
+        width: 100%;
+        text-align: center;
+    }
+
+    /* Action buttons in tables */
+    .action-buttons {
+        flex-direction: column;
+        gap: 0.3rem;
+    }
+
+    .action-buttons .btn {
+        width: 100%;
+        text-align: center;
+    }
+
+    /* Back button full width */
+    .back-btn-wrapper {
+        width: 100%;
+    }
+
+    .back-btn-wrapper .btn {
+        width: 100%;
+        text-align: center;
     }
 }
 
+/* Small Mobile (max 480px) */
 @media (max-width: 480px) {
     .hero h1 {
-        font-size: 2rem;
+        font-size: 1.9rem;
     }
-    
+
     .logo {
-        font-size: 1.25rem;
+        font-size: 1.2rem;
+    }
+
+    .form-container {
+        margin: 1rem 0.75rem;
+        padding: 1.25rem 1rem;
+    }
+
+    .card {
+        padding: 1.25rem;
+    }
+
+    th, td {
+        padding: 0.6rem 0.4rem;
+        font-size: 0.8rem;
+    }
+
+    .btn {
+        padding: 0.65rem 1.2rem;
+        font-size: 0.9rem;
     }
 }

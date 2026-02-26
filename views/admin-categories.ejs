@@ -1,9 +1,9 @@
 <%- include('partials/header') %>
 
 <div class="container">
-    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem;">
+    <div class="page-header">
         <h1>Manage Categories</h1>
-        <a href="/admin/dashboard" class="btn btn-outline">&larr; Back to Dashboard</a>
+        <a href="/admin/dashboard" class="btn btn-outline">&#8592; Back to Dashboard</a>
     </div>
 
     <div class="card" style="margin-bottom: 2rem; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.05);">
@@ -39,10 +39,9 @@
                             <% } %>
                         </td>
                         <td>
-                            <form action="/admin/categories/update-password" method="POST" style="display: flex; gap: 0.5rem; align-items: center;">
+                            <form action="/admin/categories/update-password" method="POST" class="category-password-form">
                                 <input type="hidden" name="categoryId" value="<%= cat._id %>">
-                                <input type="text" name="password" placeholder="No password set" value="<%= cat.password || '' %>" 
-                                       style="padding: 0.4rem 0.8rem; border-radius: 6px; border: 1px solid rgba(255, 255, 255, 0.1); background: rgba(255,255,255,0.05); color: white; width: 180px;">
+                                <input type="text" name="password" placeholder="No password set" value="<%= cat.password || '' %>" class="category-password-input">
                                 <button type="submit" class="btn btn-primary" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">Save</button>
                             </form>
                         </td>
