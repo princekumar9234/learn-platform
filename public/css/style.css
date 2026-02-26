@@ -462,29 +462,35 @@ tr:last-child td {
         display: flex;
         align-items: center;
         justify-content: center;
+        position: relative;
+        z-index: 350;   /* stays above nav panel so × is always tappable */
     }
 
-    /* Full-screen overlay menu — no transform, no overflow, works on all mobile browsers */
+    /* Side drawer — clip-path hides it without causing horizontal overflow */
     .nav-links {
         position: fixed;
-        inset: 0;                           /* covers full screen */
-        background: rgba(8, 12, 28, 0.97);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
+        top: 0;
+        right: 0;
+        width: 72%;
+        max-width: 280px;
+        height: 100dvh;
+        background: var(--bg-card);
         flex-direction: column;
         justify-content: center;
         align-items: center;
-        gap: 2.5rem;
-        z-index: 300;                       /* above navbar (200) */
-        opacity: 0;
+        gap: 2rem;
+        z-index: 300;
+        box-shadow: -8px 0 32px rgba(0, 0, 0, 0.7);
+        padding: 2rem 1.5rem;
+        /* clip-path hides FROM RIGHT — no overflow, no scroll bleed */
+        clip-path: inset(0 0 0 100%);
         visibility: hidden;
         pointer-events: none;
-        transition: opacity 0.25s ease, visibility 0.25s ease;
-        padding: 2rem;
+        transition: clip-path 0.3s ease, visibility 0.3s ease;
     }
 
     .nav-links.active {
-        opacity: 1;
+        clip-path: inset(0 0 0 0);   /* fully visible — slides in from right */
         visibility: visible;
         pointer-events: auto;
     }
@@ -496,11 +502,10 @@ tr:last-child td {
 
     .nav-links li a {
         display: block;
-        font-size: 1.3rem;
+        font-size: 1.15rem;
         font-weight: 600;
-        padding: 0.75rem 0;
+        padding: 0.65rem 0;
         color: var(--text-main);
-        letter-spacing: 0.5px;
         transition: color 0.2s;
     }
 
@@ -510,22 +515,23 @@ tr:last-child td {
 
     .nav-links li a.btn {
         display: inline-block;
-        width: auto;
-        min-width: 160px;
+        width: 100%;
+        max-width: 190px;
         text-align: center;
-        margin-top: 0.5rem;
+        margin-top: 0.4rem;
     }
 
-    /* Navbar must be above the full-screen nav for the ≡/× button to be visible */
-    /* Already set to z-index: 200, but the toggle button needs to be above nav-links (300) */
-    .mobile-menu-toggle {
-        position: relative;
-        z-index: 350;   /* above nav-links (300) so × is always clickable */
-    }
-
-    /* Nav overlay not needed—nav-links IS the full-screen overlay */
+    /* Dark overlay behind the drawer */
     .nav-overlay {
-        display: none !important;
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.55);
+        z-index: 50;    /* below navbar (200) and nav drawer (300) */
+    }
+
+    .nav-overlay.active {
+        display: block;
     }
 
     /* ── Hero ── */
