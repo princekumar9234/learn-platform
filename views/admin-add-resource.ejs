@@ -3,7 +3,12 @@
 <div class="form-container">
     <h2 style="margin-bottom: 1.5rem;">Add New Resource</h2>
     <% if (error) { %>
-        <div class="alert alert-danger"><%= error %></div>
+        <div class="alert alert-danger" id="error-alert" style="display:flex; justify-content:space-between; align-items:flex-start; gap:0.5rem;">
+            <span><%= error %></span>
+            <button onclick="document.getElementById('error-alert').style.display='none'" 
+                style="background:none; border:none; color:inherit; font-size:1.2rem; cursor:pointer; flex-shrink:0; line-height:1; opacity:0.7;" 
+                title="Close">✕</button>
+        </div>
     <% } %>
     <form action="/admin/resource/add" method="POST" enctype="multipart/form-data" id="resource-form">
         <div class="form-group">
