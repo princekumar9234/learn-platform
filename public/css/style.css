@@ -105,7 +105,7 @@ a {
     padding: 1rem 0;
     position: sticky;
     top: 0;
-    z-index: 100;
+    z-index: 200;   /* Raised: must be above nav-overlay (z-index:50) */
     backdrop-filter: blur(10px);
 }
 
@@ -510,12 +510,13 @@ tr:last-child td {
     }
 
     /* Nav overlay when menu open */
+    /* z-index must be BELOW .navbar (200) so it doesn't block nav-link clicks */
     .nav-overlay {
         display: none;
         position: fixed;
         inset: 0;
-        background: rgba(0,0,0,0.5);
-        z-index: 999;
+        background: rgba(0, 0, 0, 0.55);
+        z-index: 50;  /* Below navbar (200), above main content (0) */
     }
 
     .nav-overlay.active {
