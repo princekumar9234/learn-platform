@@ -5,7 +5,7 @@
     <% if (error) { %>
         <div class="alert alert-danger"><%= error %></div>
     <% } %>
-    <form action="/admin/resource/add" method="POST" enctype="multipart/form-data">
+    <form action="/admin/resource/add" method="POST" enctype="multipart/form-data" id="resource-form">
         <div class="form-group">
             <label class="form-label">Title</label>
             <input type="text" name="title" class="form-control" required>
@@ -23,8 +23,15 @@
 
         <!-- File Upload Input (Hidden by default) -->
         <div class="form-group" id="file-group" style="display: none;">
-            <label class="form-label">Upload PDF</label>
+            <label class="form-label">
+                Upload PDF
+                <span style="font-size:0.8rem; color: var(--text-muted); margin-left: 0.5rem;">
+                    (Max: 10MB — Cloudinary Free Plan limit)
+                </span>
+            </label>
             <input type="file" name="pdf" id="file-input" class="form-control" accept="application/pdf">
+            <!-- File size warning box -->
+            <div id="file-size-warning" style="display:none; margin-top:0.75rem; padding:0.75rem 1rem; border-radius:8px; font-size:0.9rem;"></div>
         </div>
 
         <div class="grid" style="margin-top: 0; gap: 1rem;">
@@ -57,28 +64,75 @@
             </div>
         </div>
         
-        <button type="submit" class="btn btn-success" style="width: 100%; background-color: var(--success); color: white;">Add Resource</button>
+        <button type="submit" id="submit-btn" class="btn btn-success" style="width: 100%; background-color: var(--success); color: white;">Add Resource</button>
 
     <script>
+        const CLOUDINARY_FREE_LIMIT_MB = 10;   // Cloudinary free plan raw file limit
+        const HARD_LIMIT_MB = 50;              // Our multer hard limit
+
         function toggleInput() {
             const type = document.getElementById('type-select').value;
             const urlGroup = document.getElementById('url-group');
             const fileGroup = document.getElementById('file-group');
             const urlInput = document.getElementById('url-input');
-            const fileInput = document.getElementById('file-input');
 
             if (type === 'pdf') {
                 urlGroup.style.display = 'none';
                 fileGroup.style.display = 'block';
                 urlInput.required = false;
-                // fileInput.required = true; // Optional: Enforce file if PDF
             } else {
                 urlGroup.style.display = 'block';
                 fileGroup.style.display = 'none';
                 urlInput.required = true;
-                // fileInput.required = false;
+                clearFileSizeWarning();
             }
         }
+
+        function clearFileSizeWarning() {
+            const warn = document.getElementById('file-size-warning');
+            warn.style.display = 'none';
+            warn.innerHTML = '';
+        }
+
+        document.getElementById('file-input').addEventListener('change', function() {
+            const file = this.files[0];
+            const warn = document.getElementById('file-size-warning');
+            const submitBtn = document.getElementById('submit-btn');
+
+            if (!file) { clearFileSizeWarning(); return; }
+
+            const sizeInMB = (file.size / (1024 * 1024)).toFixed(2);
+
+            if (file.size > HARD_LIMIT_MB * 1024 * 1024) {
+                // BLOCK: above our server limit
+                warn.style.display = 'block';
+                warn.style.background = 'rgba(239,68,68,0.15)';
+                warn.style.border = '1px solid rgba(239,68,68,0.3)';
+                warn.style.color = '#ef4444';
+                warn.innerHTML = `❌ <strong>${sizeInMB} MB</strong> — File ${HARD_LIMIT_MB}MB se zyada hai. Ye upload nahi hoga.`;
+                submitBtn.disabled = true;
+                submitBtn.style.opacity = '0.5';
+            } else if (file.size > CLOUDINARY_FREE_LIMIT_MB * 1024 * 1024) {
+                // WARN: above Cloudinary free limit
+                warn.style.display = 'block';
+                warn.style.background = 'rgba(245,158,11,0.15)';
+                warn.style.border = '1px solid rgba(245,158,11,0.3)';
+                warn.style.color = '#f59e0b';
+                warn.innerHTML = `⚠️ <strong>${sizeInMB} MB</strong> — Cloudinary Free Plan sirf <strong>10MB</strong> allow karta hai. Ye file upload fail ho sakti hai.<br><small style="opacity:0.8">Cloudinary plan upgrade karein ya 10MB se choti PDF use karein.</small>`;
+                submitBtn.disabled = false;
+                submitBtn.style.opacity = '1';
+            } else {
+                // OK range
+                warn.style.display = 'block';
+                warn.style.background = 'rgba(16,185,129,0.15)';
+                warn.style.border = '1px solid rgba(16,185,129,0.3)';
+                warn.style.color = '#10b981';
+                warn.innerHTML = `✅ <strong>${sizeInMB} MB</strong> — File size theek hai.`;
+                submitBtn.disabled = false;
+                submitBtn.style.opacity = '1';
+            }
+        });
+
         // Run on load to set initial state
         toggleInput();
     </script>
@@ -87,3 +141,4 @@
 </div>
 
 <%- include('partials/footer') %>
+

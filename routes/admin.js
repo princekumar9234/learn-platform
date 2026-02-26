@@ -116,7 +116,8 @@ if (process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY && proce
         params: {
             folder: 'learn-platform-uploads',
             resource_type: 'auto',
-            chunk_size: 6000000, // 6MB chunks for reliable large file upload
+            chunk_size: 6000000,       // 6MB chunks — reliable for 50MB files
+            timeout: 300000,           // 5 min timeout for Cloudinary upload
             public_id: (req, file) => 'pdf-' + Date.now() + '-' + file.originalname.split('.')[0].replace(/[^a-zA-Z0-9]/g, '_')
         }
     });
@@ -157,6 +158,25 @@ function runUpload(req, res) {
     });
 }
 
+// Helper: Set a response timeout to prevent server hanging on large uploads
+// Returns a cleanup function to cancel the timeout if upload finishes in time
+function setUploadTimeout(res, timeoutMs = 300000) {
+    const timer = setTimeout(() => {
+        console.error('⏰ Upload route timeout after', timeoutMs / 1000, 'seconds');
+        if (!res.headersSent) {
+            res.status(503).send(`
+                <div style="font-family:sans-serif;padding:2rem;max-width:600px;margin:0 auto;text-align:center">
+                    <h2 style="color:#f59e0b">⏳ Upload Timeout</h2>
+                    <p>File upload mein bahut zyada time lag raha hai. Please dobara try karein ya choti file use karein.</p>
+                    <a href="javascript:history.back()" style="display:inline-block;margin-top:1rem;padding:0.6rem 1.4rem;background:#6366f1;color:white;border-radius:8px;text-decoration:none">← Go Back</a>
+                </div>
+            `);
+        }
+    }, timeoutMs);
+    // Return cancel function
+    return () => clearTimeout(timer);
+}
+
 // Resource Management
 router.get('/resource/add', (req, res) => {
     res.render('admin-add-resource', { error: null });
@@ -179,10 +199,14 @@ router.post('/resource/add', async (req, res) => {
             </div>
          `);
     }
-    
+
+    // Set 5-minute timeout guard — server won't hang forever on large uploads
+    const cancelTimeout = setUploadTimeout(res, 300000);
+
     try {
         // Run multer upload safely (catches file type errors, size errors, Cloudinary errors)
         await runUpload(req, res);
+        cancelTimeout(); // Upload done — cancel timeout guard
 
         const { title, description, type, category } = req.body;
         let url = req.body.url;
@@ -190,13 +214,10 @@ router.post('/resource/add', async (req, res) => {
         // If a file was uploaded, decide URL based on storage type
         if (req.file) {
             if (req.file.path && req.file.path.startsWith('http')) {
-                // Cloudinary returns a full URL in 'path'
                 url = req.file.path;
             } else if (req.file.secure_url) {
-                // Some versions of multer-storage-cloudinary use secure_url
                 url = req.file.secure_url;
             } else {
-                // Disk storage returns a local path, we construct the URL
                 url = '/uploads/' + req.file.filename;
             }
         }
@@ -206,23 +227,57 @@ router.post('/resource/add', async (req, res) => {
         }
 
         await Resource.create({ title, description, type, url, category });
-        res.redirect('/admin/dashboard');
+        if (!res.headersSent) res.redirect('/admin/dashboard');
     } catch (err) {
-        console.error('RESOURCE_ADD_ERROR:', err.message);
-        
-        // User-friendly error messages
-        let userMessage = err.message;
-        if (err.message && err.message.toLowerCase().includes('timeout')) {
-            userMessage = 'Upload timeout ho gaya. Please dobara try karein ya choti file use karein.';
-        } else if (err.message && err.message.toLowerCase().includes('cloudinary')) {
-            userMessage = 'File upload mein problem aayi. Please kuch seconds baad dobara try karein.';
-        } else if (err.message && err.message.toLowerCase().includes('too large')) {
-            userMessage = 'PDF file size 50MB se zyada hai. Choti file use karein.';
+        cancelTimeout();
+        const userMessage = getUploadErrorMessage(err);
+        if (!res.headersSent) {
+            res.render('admin-add-resource', { error: userMessage });
         }
-        
-        res.render('admin-add-resource', { error: userMessage });
     }
 });
+
+// ============================================================
+// Shared error message builder for upload errors
+// ============================================================
+function getUploadErrorMessage(err) {
+    // Log FULL error for debugging (visible in Render logs)
+    console.error('UPLOAD_ERROR_FULL:', {
+        code: err.code,
+        message: err.message,
+        http_code: err.http_code,
+        name: err.name
+    });
+
+    const msg = (err.message || '').toLowerCase();
+    const code = (err.code || '');
+    const httpCode = err.http_code || err.statusCode || 0;
+
+    // Multer: file too large (exceeds our own limit)
+    if (code === 'LIMIT_FILE_SIZE') {
+        return '❌ PDF file 50MB se zyada hai. Choti file use karein.';
+    }
+
+    // Cloudinary: file too large for your plan
+    // Cloudinary free plan = 10MB for raw files, returns http_code 400
+    if (httpCode === 400 || msg.includes('file too large') || msg.includes('file size') ||
+        msg.includes('exceeds') || msg.includes('payload too large') ||
+        (msg.includes('large') && msg.includes('upload'))) {
+        return '⚠️ Cloudinary Free Plan sirf 10MB tak ke PDF allow karta hai. Apna Cloudinary plan upgrade karein ya 10MB se choti PDF use karein.';
+    }
+
+    // Timeout
+    if (msg.includes('timeout') || msg.includes('etimedout') || msg.includes('socket hang')) {
+        return '⏳ Upload timeout ho gaya. Dobara try karein ya choti file use karein.';
+    }
+
+    // Generic Cloudinary error
+    if (msg.includes('cloudinary') || msg.includes('cloud')) {
+        return '☁️ Cloudinary upload fail hua. Thodi der baad dobara try karein.';
+    }
+
+    return err.message || 'Upload fail hua. Please dobara try karein.';
+}
 
 router.get('/resource/edit/:id', async (req, res) => {
     try {
@@ -288,19 +343,15 @@ router.post('/resource/edit/:id', async (req, res) => {
         }
 
         await Resource.findByIdAndUpdate(req.params.id, updateData);
-        res.redirect('/admin/dashboard');
+        if (!res.headersSent) res.redirect('/admin/dashboard');
     } catch (err) {
-        console.error('RESOURCE_EDIT_ERROR:', err.message);
-        
-        let userMessage = err.message;
-        if (err.message && err.message.toLowerCase().includes('timeout')) {
-            userMessage = 'Upload timeout ho gaya. Please dobara try karein.';
-        } else if (err.message && err.message.toLowerCase().includes('too large')) {
-            userMessage = 'PDF file size 50MB se zyada hai. Choti file use karein.';
+        const userMessage = getUploadErrorMessage(err);
+        try {
+            const resource = await Resource.findById(req.params.id);
+            if (!res.headersSent) res.render('admin-edit-resource', { resource, error: userMessage });
+        } catch (dbErr) {
+            if (!res.headersSent) res.redirect('/admin/dashboard');
         }
-        
-        const resource = await Resource.findById(req.params.id);
-        res.render('admin-edit-resource', { resource, error: userMessage });
     }
 });
 

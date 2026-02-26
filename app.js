@@ -14,6 +14,18 @@ app.use(methodOverride('_method'));
 app.use(methodOverride('_method'));
 app.use(express.static(path.join(__dirname, 'public')));
 
+// ===================== SERVER CRASH PREVENTION =====================
+// Prevent server from crashing on unhandled errors (critical for Render hosting)
+process.on('uncaughtException', (err) => {
+    console.error('❌ Uncaught Exception (server kept running):', err.message);
+    // Do NOT call process.exit() - keep server alive
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('❌ Unhandled Promise Rejection (server kept running):', reason);
+    // Do NOT call process.exit() - keep server alive
+});
+
 // Ensure Uploads Directory Exists (For Disk Mode)
 const fs = require('fs');
 const uploadDir = path.join(__dirname, 'public/uploads');
@@ -121,6 +133,46 @@ app.use('/', require('./routes/index'));
 // Handle Missing Uploads (Friendly 404)
 app.get('/uploads/:filename', (req, res) => {
     res.status(404).render('404-upload');
+});
+
+// ===================== GLOBAL ERROR HANDLER =====================
+// Catches any unhandled errors from routes and prevents server crash
+// Must be defined AFTER all routes
+// eslint-disable-next-line no-unused-vars
+app.use((err, req, res, next) => {
+    console.error('🔥 Global Error Handler:', err.message);
+
+    // Handle file too large (Multer)
+    if (err.code === 'LIMIT_FILE_SIZE') {
+        return res.status(413).send(`
+            <div style="font-family:sans-serif;padding:2rem;max-width:600px;margin:0 auto;text-align:center">
+                <h2 style="color:#ef4444">📁 File Too Large</h2>
+                <p>PDF size limit <strong>50MB</strong> se zyada hai. Choti file use karein.</p>
+                <a href="javascript:history.back()" style="display:inline-block;margin-top:1rem;padding:0.6rem 1.4rem;background:#6366f1;color:white;border-radius:8px;text-decoration:none">← Go Back</a>
+            </div>
+        `);
+    }
+
+    // Handle request entity too large (Express body-parser)
+    if (err.status === 413 || err.type === 'entity.too.large') {
+        return res.status(413).send(`
+            <div style="font-family:sans-serif;padding:2rem;max-width:600px;margin:0 auto;text-align:center">
+                <h2 style="color:#ef4444">📁 Upload Too Large</h2>
+                <p>File 50MB se zyada hai. Choti file use karein.</p>
+                <a href="javascript:history.back()" style="display:inline-block;margin-top:1rem;padding:0.6rem 1.4rem;background:#6366f1;color:white;border-radius:8px;text-decoration:none">← Go Back</a>
+            </div>
+        `);
+    }
+
+    // Generic server error - render error or send JSON
+    if (res.headersSent) return next(err);
+    res.status(500).send(`
+        <div style="font-family:sans-serif;padding:2rem;max-width:600px;margin:0 auto;text-align:center">
+            <h2 style="color:#ef4444">⚠️ Server Error</h2>
+            <p>${err.message || 'Kuch gadbad ho gayi. Please dobara try karein.'}</p>
+            <a href="javascript:history.back()" style="display:inline-block;margin-top:1rem;padding:0.6rem 1.4rem;background:#6366f1;color:white;border-radius:8px;text-decoration:none">← Go Back</a>
+        </div>
+    `);
 });
 
 // Database Connection & Server Start
