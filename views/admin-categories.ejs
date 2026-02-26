@@ -6,10 +6,17 @@
         <a href="/admin/dashboard" class="btn btn-outline">&#8592; Back to Dashboard</a>
     </div>
 
+    <% if (success) { %>
+        <div class="alert alert-success" style="display:flex; justify-content:space-between; align-items:center; gap:0.5rem; margin-bottom:1.5rem;">
+            <span>✅ <%= success.replace(/\+/g, ' ') %></span>
+            <button onclick="this.parentElement.style.display='none'" style="background:none;border:none;color:inherit;font-size:1.2rem;cursor:pointer;opacity:0.7;">✕</button>
+        </div>
+    <% } %>
+
     <div class="card" style="margin-bottom: 2rem; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.05);">
         <p style="color: var(--text-muted); font-size: 0.95rem;">
-            Setting a password for a category will require users to enter it before they can see the resources in that category. 
-            Leave the password blank to disable protection.
+            <strong style="color: var(--text-main);">Password Protection:</strong> Setting a password requires users to enter it before seeing resources in that category. Leave blank to disable.<br>
+            <strong style="color: var(--text-main); margin-top: 0.4rem; display: inline-block;">Rename / Merge:</strong> Rename a category to another existing name to <em>merge</em> both into one.
         </p>
     </div>
 
@@ -20,7 +27,7 @@
                     <th>Category Name</th>
                     <th>Status</th>
                     <th>Password</th>
-                    <th>Action</th>
+                    <th>Rename / Merge</th>
                 </tr>
             </thead>
             <tbody>
@@ -30,11 +37,11 @@
                         <td>
                             <% if (cat.password) { %>
                                 <span class="status-badge" style="background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2);">
-                                    <ion-icon name="lock-closed-outline" style="vertical-align: middle; margin-right: 4px;"></ion-icon> Protected
+                                    <ion-icon name="lock-closed-outline" style="vertical-align: middle; margin-right: 4px;"></ion-icon>Protected
                                 </span>
                             <% } else { %>
                                 <span class="status-badge" style="background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.2);">
-                                    <ion-icon name="lock-open-outline" style="vertical-align: middle; margin-right: 4px;"></ion-icon> Public
+                                    <ion-icon name="lock-open-outline" style="vertical-align: middle; margin-right: 4px;"></ion-icon>Public
                                 </span>
                             <% } %>
                         </td>
@@ -46,9 +53,22 @@
                             </form>
                         </td>
                         <td>
-                            <span style="color: var(--text-muted); font-size: 0.85rem;">
-                                <%= cat.name.toLowerCase() === 'projects' ? 'System Category' : 'User Category' %>
-                            </span>
+                            <form action="/admin/categories/rename" method="POST" class="category-password-form"
+                                onsubmit="return confirmRename(this)">
+                                <input type="hidden" name="categoryId" value="<%= cat._id %>">
+                                <input type="text" name="newName" placeholder="New name..."
+                                    value="<%= cat.name %>"
+                                    class="category-password-input"
+                                    list="cat-name-list-<%= cat._id %>">
+                                <datalist id="cat-name-list-<%= cat._id %>">
+                                    <% categories.forEach(c => { %>
+                                        <% if (c._id.toString() !== cat._id.toString()) { %>
+                                            <option value="<%= c.name %>">
+                                        <% } %>
+                                    <% }) %>
+                                </datalist>
+                                <button type="submit" class="btn btn-warning" style="padding: 0.4rem 0.8rem; font-size: 0.85rem; background:#f59e0b; color:white;">Rename</button>
+                            </form>
                         </td>
                     </tr>
                 <% }) %>
@@ -61,5 +81,26 @@
         </table>
     </div>
 </div>
+
+<script>
+function confirmRename(form) {
+    const input = form.querySelector('input[name="newName"]');
+    const hidden = form.querySelector('input[name="categoryId"]');
+    const newName = input.value.trim();
+    const currentName = input.defaultValue.trim();
+
+    if (!newName) { alert('Name cannot be empty.'); return false; }
+    if (newName === currentName) return false;
+
+    // Check if it matches another existing category (merge warning)
+    const allOptions = Array.from(input.list ? input.list.options : []).map(o => o.value);
+    if (allOptions.includes(newName)) {
+        return confirm(
+            `"${newName}" category already exists!\n\nDo you want to MERGE "${currentName}" into "${newName}"?\n\nAll resources from "${currentName}" will move to "${newName}".`
+        );
+    }
+    return confirm(`Rename "${currentName}" to "${newName}"?`);
+}
+</script>
 
 <%- include('partials/footer') %>

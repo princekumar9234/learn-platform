@@ -379,7 +379,8 @@ router.get('/categories', async (req, res) => {
         }
         
         const categories = await Category.find().sort('name');
-        res.render('admin-categories', { categories, error: null });
+        const success = req.query.success || null;
+        res.render('admin-categories', { categories, error: null, success });
     } catch (err) {
         console.error(err);
         res.redirect('/admin/dashboard');
@@ -399,4 +400,54 @@ router.post('/categories/update-password', async (req, res) => {
     }
 });
 
+// Category Rename / Merge
+// Renames a category AND updates all resources under old name → new name
+// If new name already exists as a category, it merges them (deletes old)
+router.post('/categories/rename', async (req, res) => {
+    try {
+        const { categoryId, newName } = req.body;
+        const trimmedName = newName ? newName.trim() : '';
+
+        if (!trimmedName) {
+            return res.redirect('/admin/categories?error=Name+cannot+be+empty');
+        }
+
+        // Get the old category
+        const oldCat = await Category.findById(categoryId);
+        if (!oldCat) {
+            return res.redirect('/admin/categories');
+        }
+
+        const oldName = oldCat.name;
+
+        if (oldName === trimmedName) {
+            return res.redirect('/admin/categories'); // No change
+        }
+
+        // Update ALL resources from old category name → new name
+        await Resource.updateMany({ category: oldName }, { category: trimmedName });
+
+        // Check if a category with the NEW name already exists
+        const existingNewCat = await Category.findOne({ name: trimmedName });
+
+        if (existingNewCat) {
+            // Merge: old category gets deleted, new category already exists
+            // Transfer password from old to new only if new doesn't have one
+            if (oldCat.password && !existingNewCat.password) {
+                await Category.findByIdAndUpdate(existingNewCat._id, { password: oldCat.password });
+            }
+            await Category.findByIdAndDelete(categoryId); // Delete duplicate
+        } else {
+            // Simply rename
+            await Category.findByIdAndUpdate(categoryId, { name: trimmedName });
+        }
+
+        res.redirect('/admin/categories?success=Category+renamed+successfully');
+    } catch (err) {
+        console.error('CATEGORY_RENAME_ERROR:', err);
+        res.redirect('/admin/categories');
+    }
+});
+
 module.exports = router;
+
