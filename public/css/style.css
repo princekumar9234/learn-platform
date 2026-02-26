@@ -12,6 +12,10 @@
     --glass: rgba(30, 41, 59, 0.7);
 }
 
+html {
+    overflow-x: hidden;
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -25,6 +29,8 @@ body {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+    overflow-x: hidden;
+    width: 100%;
 }
 
 /* Typography */
