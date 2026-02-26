@@ -406,6 +406,8 @@ tr:last-child td {
     font-size: 2rem;
     cursor: pointer;
     z-index: 1001;
+    padding: 0;
+    line-height: 1;
 }
 
 /* ===================== RESPONSIVE ===================== */
@@ -423,86 +425,141 @@ tr:last-child td {
         padding: 1.25rem 1rem;
     }
 
-    /* Mobile nav */
+    /* ── Navbar ── */
     .mobile-menu-toggle {
-        display: block;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
 
     .nav-links {
         position: fixed;
         top: 0;
         right: -100%;
-        width: 75%;
-        max-width: 320px;
+        width: 78%;
+        max-width: 300px;
         height: 100vh;
         background: var(--bg-card);
         flex-direction: column;
         justify-content: center;
         align-items: center;
         gap: 2rem;
-        transition: 0.3s ease-in-out;
-        box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5);
+        transition: right 0.3s ease-in-out;
+        box-shadow: -10px 0 40px rgba(0, 0, 0, 0.6);
         z-index: 1000;
+        padding: 2rem 1rem;
     }
 
     .nav-links.active {
         right: 0;
     }
 
-    .nav-links li a.btn {
-        width: 160px;
+    .nav-links li {
+        width: 100%;
         text-align: center;
     }
 
-    /* Hero */
+    .nav-links li a {
+        display: block;
+        font-size: 1.1rem;
+        padding: 0.5rem 0;
+    }
+
+    .nav-links li a.btn {
+        width: 100%;
+        max-width: 200px;
+        text-align: center;
+        display: inline-block;
+    }
+
+    /* Nav overlay when menu open */
+    .nav-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.5);
+        z-index: 999;
+    }
+
+    .nav-overlay.active {
+        display: block;
+    }
+
+    /* ── Hero ── */
     .hero {
-        padding: 4rem 1.5rem;
+        padding: 3.5rem 1.25rem 2.5rem;
     }
 
     .hero h1 {
-        font-size: 2.4rem;
+        font-size: 2.2rem;
+        line-height: 1.2;
     }
 
     .hero p {
         font-size: 1rem;
+        margin-bottom: 2rem;
     }
 
     .hero-buttons {
         flex-direction: column;
         align-items: center;
+        gap: 0.75rem;
     }
 
     .hero-buttons .btn {
-        width: 200px;
+        width: 100%;
+        max-width: 240px;
         text-align: center;
     }
 
-    /* Cards grid */
+    /* ── Cards Grid ── */
     .grid {
         grid-template-columns: 1fr;
+        gap: 1rem;
     }
 
-    /* Forms */
+    .card {
+        padding: 1.25rem;
+    }
+
+    /* ── Forms ── */
     .form-container {
-        margin: 1.5rem 1rem;
-        padding: 1.5rem;
+        margin: 1.25rem 0.75rem;
+        padding: 1.5rem 1.25rem;
+        border-radius: 12px;
     }
 
-    /* Tables */
+    .form-group {
+        margin-bottom: 1.25rem;
+    }
+
+    /* ── Tables ── */
     .table-container {
-        padding: 0.5rem;
+        padding: 0.5rem 0.25rem;
         border-radius: 8px;
+        margin-top: 1rem;
+    }
+
+    table {
+        min-width: 420px;
     }
 
     th, td {
-        padding: 0.75rem 0.5rem;
-        font-size: 0.875rem;
+        padding: 0.65rem 0.5rem;
+        font-size: 0.82rem;
     }
 
-    /* Page headers */
+    /* ── Page Headers ── */
     .page-header {
         flex-direction: column;
         align-items: flex-start;
+        gap: 0.75rem;
+        margin-bottom: 1.25rem;
+    }
+
+    .page-header h1,
+    .page-header h2 {
+        font-size: 1.5rem;
     }
 
     .page-header .btn {
@@ -510,26 +567,29 @@ tr:last-child td {
         text-align: center;
     }
 
-    /* Category password form */
+    /* ── Category password form ── */
     .category-password-input {
         width: 100%;
+        min-width: 0;
     }
 
     .category-password-form {
         flex-direction: column;
         align-items: stretch;
+        gap: 0.5rem;
     }
 
     .category-password-form .btn {
         width: 100%;
     }
 
-    /* Admin dashboard stat cards */
+    /* ── Admin Dashboard Stat Cards ── */
     .admin-card-buttons {
         display: flex;
         flex-direction: column;
         gap: 0.5rem;
         width: 100%;
+        margin-top: auto;
     }
 
     .admin-card-buttons .btn {
@@ -537,18 +597,22 @@ tr:last-child td {
         text-align: center;
     }
 
-    /* Action buttons in tables */
+    /* ── Action Buttons in Tables ── */
     .action-buttons {
-        flex-direction: column;
+        flex-direction: row;
+        flex-wrap: wrap;
         gap: 0.3rem;
     }
 
     .action-buttons .btn {
-        width: 100%;
+        flex: 1 1 auto;
+        min-width: 52px;
         text-align: center;
+        font-size: 0.75rem;
+        padding: 0.3rem 0.4rem;
     }
 
-    /* Back button full width */
+    /* ── Back Button ── */
     .back-btn-wrapper {
         width: 100%;
     }
@@ -557,12 +621,27 @@ tr:last-child td {
         width: 100%;
         text-align: center;
     }
+
+    /* ── Admin add-resource grid (Type + Category side by side) ── */
+    .form-grid-2 {
+        grid-template-columns: 1fr !important;
+    }
+
+    /* ── Status badges ── */
+    .status-badge {
+        font-size: 0.75rem;
+        padding: 0.2rem 0.45rem;
+    }
 }
 
 /* Small Mobile (max 480px) */
 @media (max-width: 480px) {
     .hero h1 {
-        font-size: 1.9rem;
+        font-size: 1.75rem;
+    }
+
+    .hero p {
+        font-size: 0.93rem;
     }
 
     .logo {
@@ -570,21 +649,26 @@ tr:last-child td {
     }
 
     .form-container {
-        margin: 1rem 0.75rem;
+        margin: 0.75rem 0.5rem;
         padding: 1.25rem 1rem;
     }
 
     .card {
-        padding: 1.25rem;
+        padding: 1rem;
     }
 
     th, td {
-        padding: 0.6rem 0.4rem;
-        font-size: 0.8rem;
+        padding: 0.5rem 0.35rem;
+        font-size: 0.78rem;
     }
 
     .btn {
-        padding: 0.65rem 1.2rem;
-        font-size: 0.9rem;
+        padding: 0.6rem 1rem;
+        font-size: 0.88rem;
+    }
+
+    /* Admin add/edit resource — remove inline grid on tiny screens */
+    .grid[style*="gap: 1rem"] {
+        gap: 0 !important;
     }
 }

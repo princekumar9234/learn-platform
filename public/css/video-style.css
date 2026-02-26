@@ -82,7 +82,7 @@
 @media (max-width: 768px) {
     .video-grid {
         grid-template-columns: 1fr;
-        gap: 1.5rem;
+        gap: 1.25rem;
     }
     
     .video-title {
@@ -97,5 +97,26 @@
     .drive-embed-wrapper {
         padding-bottom: 140%; /* Slightly taller on mobile */
     }
+
+    .video-content {
+        padding: 0.85rem;
+    }
 }
 
+@media (max-width: 480px) {
+    .video-grid {
+        gap: 1rem;
+    }
+
+    .video-content {
+        padding: 0.75rem;
+    }
+
+    .video-title {
+        font-size: 0.95rem;
+    }
+
+    .video-desc {
+        font-size: 0.82rem;
+    }
+}
