@@ -17,7 +17,12 @@ app.use(express.urlencoded({ extended: true, limit: '100mb' }));
 app.use(express.json({ limit: '100mb' }));
 app.use(methodOverride('_method'));
 app.use(methodOverride('_method'));
-app.use(express.static(path.join(__dirname, '../frontend/public')));
+// Serve static files from the React app
+if (process.env.NODE_ENV === 'production') {
+    app.use(express.static(path.join(__dirname, '../frontend/dist')));
+} else {
+    app.use(express.static(path.join(__dirname, '../frontend/public')));
+}
 
 // ===================== SERVER CRASH PREVENTION =====================
 // Prevent server from crashing on unhandled errors (critical for Render hosting)
@@ -137,6 +142,15 @@ app.get('/config-check', (req, res) => {
 // Routes
 app.use('/admin', require('./routes/admin'));
 app.use('/', require('./routes/index'));
+
+// React SPA Fallback: Serve index.html for any route that doesn't match an API route
+if (process.env.NODE_ENV === 'production') {
+    app.get('*', (req, res) => {
+        // Skip API routes if you had any starting with /api
+        // if (req.path.startsWith('/api')) return next();
+        res.sendFile(path.join(__dirname, '../frontend/dist/index.html'));
+    });
+}
 
 // Handle Missing Uploads (Friendly 404)
 app.get('/uploads/:filename', (req, res) => {
