@@ -7,9 +7,9 @@ const bcrypt = require('bcryptjs');
 const https = require('https');
 const { ensureStudent, checkBlocked } = require('../middleware/auth');
 
-// Public Routes
-router.get('/', (req, res) => {
-    res.json({ message: 'Welcome to Learn.Dev API' });
+// Root API check
+router.get('/health', (req, res) => {
+    res.json({ status: 'ok', message: 'Learn.Dev API is running' });
 });
 
 router.post('/signup', async (req, res) => {

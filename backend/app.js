@@ -18,22 +18,17 @@ app.use(express.json({ limit: '100mb' }));
 app.use(methodOverride('_method'));
 app.use(methodOverride('_method'));
 // Serve static files from the React app
-if (process.env.NODE_ENV === 'production') {
-    app.use(express.static(path.join(__dirname, '../frontend/dist')));
-} else {
-    app.use(express.static(path.join(__dirname, '../frontend/public')));
-}
+app.use(express.static(path.join(__dirname, '../frontend/dist')));
+app.use(express.static(path.join(__dirname, '../frontend/public')));
 
 // ===================== SERVER CRASH PREVENTION =====================
 // Prevent server from crashing on unhandled errors (critical for Render hosting)
 process.on('uncaughtException', (err) => {
     console.error('❌ Uncaught Exception (server kept running):', err.message);
-    // Do NOT call process.exit() - keep server alive
 });
 
 process.on('unhandledRejection', (reason, promise) => {
     console.error('❌ Unhandled Promise Rejection (server kept running):', reason);
-    // Do NOT call process.exit() - keep server alive
 });
 
 // Ensure Uploads Directory Exists (For Disk Mode)
@@ -44,26 +39,16 @@ if (!fs.existsSync(uploadDir)) {
 }
 
 // Check Environment Variables
-// Check Environment Variables
-// Check Environment Variables
 const useCloudinary = process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY && process.env.CLOUDINARY_API_SECRET;
 
 console.log('--------------------------------------------------------------------------------');
-console.log('Checking Cloudinary Configuration...');
-console.log('Cloud Name:', process.env.CLOUDINARY_CLOUD_NAME ? 'Set' : 'Missing');
-console.log('API Key:', process.env.CLOUDINARY_API_KEY ? 'Set' : 'Missing');
-console.log('API Secret:', process.env.CLOUDINARY_API_SECRET ? 'Set' : 'Missing');
+console.log('Checking Environment & Configuration...');
+console.log('NODE_ENV:', process.env.NODE_ENV);
 console.log('Using Cloudinary:', useCloudinary ? 'YES' : 'NO');
 console.log('--------------------------------------------------------------------------------');
 
 if (!useCloudinary) {
-    console.warn('================================================================================');
-    console.warn('                           WARNING: DISK STORAGE MODE                           ');
-    console.warn('================================================================================');
-    console.warn('Cloudinary credentials are missing. Falling back to local disk storage.');
-    console.warn('NOTE: Files uploaded in this mode will be DELETED when the server restarts on Render.');
-    console.warn('To fix permanency, add CLOUDINARY credentials to your Environment Variables.');
-    console.warn('================================================================================\n');
+    console.warn('WARNING: Cloudinary credentials missing. Files will be deleted on Render restart.');
 }
 
 // Make this available to routes
@@ -97,7 +82,7 @@ app.use(session({
     }
 }));
 
-// View Engine
+// View Engine (Used for some backend renders or fallbacks)
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, '../frontend/views'));
 
@@ -108,49 +93,24 @@ app.use((req, res, next) => {
     next();
 });
 
-// DEBUG ROUTE - REMOVE IN PRODUCTION
-app.get('/config-check', (req, res) => {
-    const isCloudinarySet = process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY && process.env.CLOUDINARY_API_SECRET;
-    const isMongoAtlas = process.env.MONGO_URI && process.env.MONGO_URI.includes('mongodb+srv');
-    
-    const dbState = mongoose.connection.readyState; // 0: disconnected, 1: connected, 2: connecting, 3: disconnecting
-    const dbStatus = dbState === 1 ? '<span style="color:green">✅ CONNECTED</span>' : '<span style="color:red">❌ DISCONNECTED</span>';
-
-    res.send(`
-        <body style="font-family: sans-serif; padding: 2rem;">
-        <h1>System Configuration Check</h1>
-        
-        <div style="background: #f1f5f9; padding: 1.5rem; border-radius: 0.5rem; border: 1px solid #cbd5e1; margin-bottom: 2rem;">
-            <h3>1. Cloudinary (PDF Storage)</h3>
-            <p><strong>Cloud Name:</strong> ${process.env.CLOUDINARY_CLOUD_NAME ? '✅ Set' : '❌ Missing'}</p>
-            <p><strong>Status:</strong> ${isCloudinarySet ? '<span style="color:green">ACTIVE (Permanent Files)</span>' : '<span style="color:red">INACTIVE (Files will delete on restart)</span>'}</p>
-        </div>
-
-        <div style="background: #e2e8f0; padding: 1.5rem; border-radius: 0.5rem; border: 1px solid #cbd5e1;">
-            <h3>2. MongoDB (Login/Data Storage)</h3>
-            <p><strong>Connection Status:</strong> ${dbStatus}</p>
-            <p><strong>Database Type:</strong> ${isMongoAtlas ? '<span style="color:green">✅ CLOUD (Permanent Data)</span>' : '<span style="color:red">⚠️ LOCAL/DISK (Data deletes on restart)</span>'}</p>
-            <p style="font-size: 0.9rem;">(If Database Type is LOCAL, your Admin account will be deleted every time Render restarts.)</p>
-        </div>
-
-        <br>
-        <a href="/MONGODB_SETUP.md" target="_blank" style="color: blue;">read how to fix MongoDB</a>
-        </body>
-    `);
-});
-
-// Routes
-app.use('/admin', require('./routes/admin'));
-app.use('/', require('./routes/index'));
+// API Routes (Prefixed with /api)
+app.use('/api/admin', require('./routes/admin'));
+app.use('/api', require('./routes/index'));
 
 // React SPA Fallback: Serve index.html for any route that doesn't match an API route
-if (process.env.NODE_ENV === 'production') {
-    app.get('*', (req, res) => {
-        // Skip API routes if you had any starting with /api
-        // if (req.path.startsWith('/api')) return next();
-        res.sendFile(path.join(__dirname, '../frontend/dist/index.html'));
+// This MUST be after defining all API routes
+app.get('*', (req, res, next) => {
+    // If the request is for an API or static file that doesn't exist, don't serve index.html
+    if (req.path.startsWith('/api') || req.path.includes('.')) {
+        return next();
+    }
+    res.sendFile(path.join(__dirname, '../frontend/dist/index.html'), (err) => {
+        if (err) {
+            // Fallback to local index if dist is missing (useful for some dev setups)
+            res.status(404).send("Frontend build not found. Please run 'npm run build' in the frontend directory.");
+        }
     });
-}
+});
 
 // Handle Missing Uploads (Friendly 404)
 app.get('/uploads/:filename', (req, res) => {
