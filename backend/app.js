@@ -202,7 +202,7 @@ app.use((err, req, res, next) => {
 console.log(`Attempting to connect to database... (URI source: ${useRemoteDb ? 'ENV' : 'Local'})`);
 
 const Admin = require('./Admin');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 
 async function seedDefaultAdmin() {
     try {

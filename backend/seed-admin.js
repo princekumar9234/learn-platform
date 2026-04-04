@@ -1,6 +1,6 @@
 require('dotenv').config();
 const mongoose = require('mongoose');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const Admin = require('./Admin');
 
 const dbUri = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/learn-platform';

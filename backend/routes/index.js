@@ -3,7 +3,7 @@ const router = express.Router();
 const Student = require('../Student');
 const Resource = require('../Resource');
 const Category = require('../Category');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const https = require('https');
 const { ensureStudent, checkBlocked } = require('../middleware/auth');
 
