@@ -4,9 +4,23 @@
   "scripts": {
     "start": "node app.js",
     "dev": "concurrently \"npm start --prefix backend\" \"npm run dev --prefix frontend\"",
-    "build": "npm install --prefix backend && npm install --prefix frontend && npm run build --prefix frontend",
+    "build": "npm install && npm run build --prefix frontend",
     "install-all": "npm install --prefix backend && npm install --prefix frontend",
     "seed": "node backend/seed-admin.js"
+  },
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "cloudinary": "^1.41.3",
+    "connect-mongo": "^5.0.0",
+    "cors": "^2.8.6",
+    "dotenv": "^17.2.3",
+    "ejs": "^4.0.1",
+    "express": "^5.2.1",
+    "express-session": "^1.19.0",
+    "method-override": "^3.0.0",
+    "mongoose": "^9.1.5",
+    "multer": "^2.0.2",
+    "multer-storage-cloudinary": "^4.0.0"
   },
   "devDependencies": {
     "concurrently": "^9.2.1"
